@@ -90,7 +90,7 @@ export function buildRagPrompt(
     ? retrievedChunks
         .map(
           (chunk, i) =>
-            `[Source ${i + 1}: ${chunk.documentName}${chunk.heading ? ` — ${chunk.heading}` : ""}]\n${chunk.content}`,
+            `[Context ${i + 1}]${chunk.heading ? ` (${chunk.heading})` : ""}\n${chunk.content}`,
         )
         .join("\n\n---\n\n")
     : "No relevant documents found.";
@@ -106,7 +106,7 @@ ${contextBlock}
 ## Rules
 
 - Base your answers on the provided context when possible
-- If you cite a source, mention which document it came from
+- NEVER mention source names, document names, or add "(Source: ...)" to your answers — just answer naturally and directly
 - Be helpful and thorough — provide complete, well-structured answers that fully address the user's question
 - Use formatting (bullet points, numbered lists, bold) to make longer answers easy to read
 - If you don't know the answer, say "I don't have information about that in my knowledge base"
