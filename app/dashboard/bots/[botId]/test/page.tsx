@@ -51,7 +51,7 @@ export default async function TestBotPage({
             </Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send messages to test this bot's behavior. Responses stream from
+            Send messages to test this bot&apos;s behavior. Responses stream from
             the same endpoint visitors use.
           </p>
         </div>
