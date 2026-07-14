@@ -215,7 +215,7 @@ model DocumentChunk {
 
   // pgvector column. Unsupported type => managed via migrations + $queryRaw only;
   // Prisma can still read the row (embedding comes back as a string of floats).
-  embedding    Unsupported("vector(1536)")?
+  embedding    Unsupported("vector(1024)")?
 
   createdAt    DateTime @default(now())
 

@@ -5,12 +5,13 @@
  *
  * Provider strategy: Jina first, OpenAI fallback. Both expose an OpenAI-compatible
  * embeddings endpoint, so we use the same `embeddings.create` call shape for both —
- * only the base URL + model differ. Jina's `jina-embeddings-v3` emits 1536 dims
- * natively, matching the existing `vector(1536)` column — so no migration is needed.
+ * only the base URL + model differ. Jina's `jina-embeddings-v3` emits 1024 dims via
+ * the OpenAI-compatible endpoint (the max it allows). Column is vector(1024).
  *
  * CRITICAL: the returned `number[]` is stored in a pgvector column via raw SQL
  * ($executeRaw, `::vector` cast) — NOT through Prisma's typed create() data, which
  * cannot write `Unsupported("vector(N)")` columns. See services/documents.ts.
+ * Length must match the column dimension (1024).
  *
  * Memory anchor: [[supportiq-ai-providers]] — Groq is chat-only (no embedding model),
  * so embeddings must use a different provider than the chat provider.
@@ -59,8 +60,9 @@ function getClient(): { client: OpenAI; model: string; dimensions: number } {
     }
     client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
     clientModel = env.OPENAI_EMBEDDING_MODEL;
-    // OpenAI text-embedding-3-small is 1536-dim by default.
-    clientDimensions = 1536;
+    // OpenAI text-embedding-3-small supports a `dimensions` param (min 256, max 1536).
+    // Use 1024 to match the vector(1024) column (and Jina's cap).
+    clientDimensions = 1024;
   }
 
   return { client, model: clientModel!, dimensions: clientDimensions! };
@@ -68,7 +70,7 @@ function getClient(): { client: OpenAI; model: string; dimensions: number } {
 
 /**
  * Generate an embedding vector for a single text string.
- * Returns a float array whose length equals the configured dimension (1536 for Jina v3).
+ * Returns a float array whose length equals the configured dimension (1024 for Jina v3).
  */
 export async function embed(text: string): Promise<number[]> {
   const { client: c, model, dimensions } = getClient();

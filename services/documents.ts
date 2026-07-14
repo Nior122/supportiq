@@ -12,7 +12,7 @@
  * architecture is designed so the service functions are the same regardless
  * of whether they're called from a server action or a background worker.
  *
- * VECTOR STORAGE: pgvector columns are `Unsupported("vector(1536)")` in Prisma —
+ * VECTOR STORAGE: pgvector columns are `Unsupported("vector(1024)")` in Prisma —
  * Prisma's typed create/update cannot write them. We use `$executeRaw` with a
  * `::vector` cast to store the embedding as a proper pgvector literal. This is
  * the only correct way to write to a vector column via Prisma + Neon HTTP.
@@ -176,14 +176,22 @@ async function processDocument(
   console.log(`[doc:${documentId}] Got ${embeddings.length} embeddings`);
 
   // Store each chunk with its vector via $executeRaw.
-  // Prisma cannot write Unsupported("vector(1536)") columns through typed
+  // Prisma cannot write Unsupported("vector(1024)") columns through typed
   // create — it treats the value as JSON and pgvector rejects it.
   // Raw SQL with ::vector cast is the canonical approach for pgvector + Prisma.
-  const vectorDim = 1536;
+  const vectorDim = embeddings[0]?.length ?? 1024;
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i]!;
     const vec = embeddings[i]!;
+    // Safety guard: reject a dimension mismatch before it lands in the
+    // vector(1024) column (else pgvector throws and the whole doc fails).
+    if (vec.length !== vectorDim) {
+      throw new Error(
+        `Embedding dimension mismatch for chunk ${i}: got ${vec.length}, expected ${vectorDim}. ` +
+          `Check JINA_EMBEDDING_DIMENSIONS matches the vector(1024) column.`,
+      );
+    }
     const vectorLiteral = `[${vec.join(",")}]`;
 
     await prisma.$executeRaw`

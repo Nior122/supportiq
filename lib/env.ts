@@ -56,9 +56,9 @@ const envSchema = z.object({
 
   // ─── Embeddings (Jina) ────────────────────────────────────
   // Jina provides an OpenAI-compatible embeddings endpoint at api.jina.ai.
-  // `jina-embeddings-v3` can emit 1536 dims natively, matching the existing
-  // pgvector(1536) column — so this works with NO migration. Free tier ~1M
-  // tokens/month. Chat stays on Groq; RAG retrieval embeddings come from Jina.
+  // `jina-embeddings-v3` emits 1024 dims via the OpenAI-compatible endpoint
+  // (max allowed). Column is vector(1024). Free tier ~1M tokens/month.
+  // Chat stays on Groq; RAG retrieval embeddings come from Jina.
   JINAAI_API_KEY: z.string().optional(),
   JINA_EMBEDDING_MODEL: z.string().default("jina-embeddings-v3"),
   JINA_EMBEDDING_DIMENSIONS: z
@@ -66,8 +66,8 @@ const envSchema = z.object({
     .int()
     .min(1)
     .max(8192)
-    .default(1536)
-    .describe("Output dims for jina-embeddings-v3; 1536 matches the pgvector column."),
+    .default(1024)
+    .describe("Output dims for jina-embeddings-v3; 1024 is the max on Jina's OpenAI-compatible endpoint."),
 
 
   // ─── Storage (Cloudinary OR Vercel Blob) ───────────────────
@@ -131,10 +131,9 @@ export const availableChatProviders = {
 
 /**
  * Which embedding provider is configured for RAG. Jina is the default; OpenAI is a
- * fallback if both keys exist (Jina wins because it's free-tier and matches the
- * existing 1536-dim column without a migration). Retrieval silently degrades to
- * "no context" in the chat route when this is false — surfaced as a clear error
- * at upload time instead.
+ * fallback if both keys exist (Jina wins because it's free-tier). Retrieval silently
+ * degrades to "no context" in the chat route when this is false — surfaced as a
+ * clear error at upload time instead.
  */
 export const availableEmbeddingProvider = env.JINAAI_API_KEY
   ? "jina"
