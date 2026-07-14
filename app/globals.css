@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * DESIGN SYSTEM TOKENS
+ * -------------------
+ * All colors are HSL channel triplets (e.g. "222 47% 11%") and are consumed through
+ * `hsl(var(--token) / <alpha-value>)` in tailwind.config.ts. Keeping them channel-only
+ * lets Tailwind apply opacity modifiers (bg-primary/50) which RGB/hex can't do.
+ *
+ * Two themes live here as `[data-theme]` + `.dark` selectors — `next-themes` toggles
+ * the `.dark` class on <html>. The palette is tuned for premium SaaS feel:
+ *   • indigo primary (brand) — energetic but trustworthy (Linear/Vercel-vibe)
+ *   • high-contrast neutral surfaces with a warm-cool split between light/dark
+ *   • green success, amber warning, red destructive for status semantics
+ */
+
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Brand */
+    --primary: 239 84% 67%; /* indigo-500 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 239 84% 95%; /* indigo-50 */
+    --accent-foreground: 239 84% 40%;
+
+    /* Semantics */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Lines + rings */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 239 84% 67%;
+
+    /* Geometry — 8px base */
+    --radius: 0.625rem; /* 10px — modern, softly rounded cards */
+  }
+
+  .dark {
+    /* Surfaces (cool-toned dark — Linear style) */
+    --background: 222 47% 7%;
+    --foreground: 210 20% 98%;
+    --card: 222 44% 9%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 44% 9%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Brand (slightly lighter indigo reads better on dark) */
+    --primary: 239 84% 73%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 222 32% 14%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 222 32% 16%;
+    --muted-foreground: 220 14% 64%;
+    --accent: 239 54% 18%;
+    --accent-foreground: 239 84% 85%;
+
+    /* Semantics (brightened for dark bg contrast) */
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 210 20% 98%;
+    --success: 142 71% 55%;
+    --success-foreground: 222 47% 11%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 222 47% 11%;
+
+    /* Lines + rings */
+    --border: 222 25% 18%;
+    --input: 222 25% 20%;
+    --ring: 239 84% 73%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+
+  /* Stereo focus ring — visible in both light/dark, keyboard reachable */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Custom scrollbars — match the muted palette so they don't visually shout */
+  ::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted-foreground/30 transition-colors;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Selection uses the brand color for a branded feel */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+@layer components {
+  /**
+   * Glass effect — used sparingly on elevated overlays (command palette, hero card).
+   * `backdrop-blur` + translucent bg + hairline border = the depth cue.
+   */
+  .glass {
+    @apply border border-border/60 bg-background/70 backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+  }
+
+  /**
+   * Skeleton shimmer — placeholder for loading states. The pseudo-element slides
+   * across via the `shimmer` keyframe defined in tailwind.config.ts.
+   */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-muted;
+  }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full;
+    content: "";
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.06),
+      transparent
+    );
+    animation: shimmer 1.5s infinite;
+  }
+
+  /** Card with the house "card" shadow — the workhorse surface token. */
+  .card-surface {
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-card;
+  }
+}
+
+@layer utilities {
+  /** Hide scrollbar while keeping scroll behavior (used by horizontal tab rails). */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /** Mask gradients for fade-out edges on overflowing content rails. */
+  .mask-fade-r {
+    -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+    mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  }
+
+  /** Constrain prose for markdown chat messages + docs. */
+  .prose-chat {
+    @apply text-[0.95rem] leading-relaxed;
+  }
+  .prose-chat pre {
+    @apply my-3 overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 text-sm;
+  }
+  .prose-chat code {
+    @apply rounded bg-muted px-1.5 py-0.5 text-[0.85em] font-medium;
+  }
+  .prose-chat pre code {
+    @apply bg-transparent p-0;
+  }
+  .prose-chat a {
+    @apply font-medium text-primary underline underline-offset-2 hover:text-primary/80;
+  }
+  .prose-chat ul {
+    @apply my-2 list-disc space-y-1 pl-6;
+  }
+  .prose-chat ol {
+    @apply my-2 list-decimal space-y-1 pl-6;
+  }
+  .prose-chat blockquote {
+    @apply border-l-2 border-primary/40 pl-3 italic text-muted-foreground;
+  }
+}

@@ -1,0 +1,27 @@
+{
+  // ESLint config. We extend Next's recommended rules (which include react-hooks and
+  // jsx-a11y presets) and turn on TypeScript-aware unused-vars so dead imports get
+  // caught in CI. `no-explicit-any` stays as a warning to encourage typing without
+  // blocking iteration during the build of a large surface area.
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "prefer-const": "error",
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }]
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "build/",
+    "coverage/",
+    "playwright-report/",
+    "*.config.js",
+    "*.config.mjs",
+    "*.config.ts"
+  ]
+}

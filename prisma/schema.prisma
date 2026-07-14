@@ -1,0 +1,551 @@
+// ════════════════════════════════════════════════════════════════════════════
+// SupportIQ — Prisma schema (PostgreSQL / Neon)
+// ════════════════════════════════════════════════════════════════════════════
+//
+// DESIGN NOTES (read before editing):
+//
+// • Tenancy = Clerk Organizations. A Clerk `orgId` maps 1:1 to Workspace.clerkOrgId.
+//   We do NOT store our own membership/invite rows — Clerk owns RBAC and we sync its
+//   webhooks. Every tenant-scoped table carries `workspaceId` so a forgotten WHERE
+//   is the ONLY way to leak data across tenants; every query path goes through a
+//   service that injects the tenant filter from the session (see services/auth).
+//
+// • pgvector: Embedding chunks are stored in `DocumentChunk.embedding Unsupported("vector(1536)")`.
+//   pgvector is an extension that Prisma can't model natively (hence `Unsupported`).
+//   We enable it via a raw SQL migration (see prisma/migrations/*-init/extension.sql)
+//   and query it with `$queryRaw` using the `<=>` cosine operator in services/ai.
+//
+// • Soft deletes: we DO NOT use deletedAt columns platform-wide. Accidental deletes
+//   are prevented by confirmation UI + server-side ownership checks; the cost of a
+//   global soft-delete filter (forgetting it = data leaks of "deleted" rows) outweighs
+//   the benefit. The lone exception is Conversation, which has `archivedAt` because
+//   analytics must retain history even after a user "deletes" a thread from the UI.
+//
+// • Indexes: every foreign key gets an index (Postgres doesn't auto-create them).
+//   Composite indexes target the actual query patterns we proved out (see comments).
+//
+// • IDs: `@default(cuid())` — collision-resistant, URL-safe, increment-free (no
+//   sequential-user-count leak).
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"] // native + Vercel build target
+  previewFeatures = ["driverAdapters"] // Required for @prisma/adapter-neon (HTTP transport)
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  // pgvector extension must be enabled (idempotent) — see first migration.
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TENANCY
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Workspace {
+  id            String   @id @default(cuid())
+  clerkOrgId    String   @unique // The Clerk Organization backing this workspace.
+  name          String
+  slug          String   @unique // URL-safe identifier; collision-checked at create.
+  logoUrl       String?
+  // Plan + entitlements (Stripe). 'free' until Stripe is enabled / a plan is bought.
+  plan          Plan     @default(FREE)
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+  trialEndsAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationships — cascade so deleting a workspace purges its bots cleanly.
+  bots          Bot[]
+  members       User[]
+  apiKeys       ApiKey[]
+  usageRecords  UsageRecord[]
+  webhooks      WebhookConfig[]
+  leads         Lead[]
+  conversations Conversation[] // Denormalized for fast tenant-scoped dashboards.
+
+  @@index([slug])
+  @@index([stripeCustomerId])
+  @@index([plan])
+}
+
+// Users are synced from Clerk webhooks (user.created/updated/deleted). We keep a
+// local row so we can FK on it from ownership/audit columns and so analytics joins
+// don't depend on Clerk availability. Clerk remains the truth for auth + roles.
+model User {
+  id            String   @id @default(cuid())
+  clerkUserId   String   @unique
+  email         String   @unique
+  emailVerified DateTime?
+  firstName     String?
+  lastName      String?
+  avatarUrl     String?
+  // Role is per-workspace (Clerk org membership role). 'OWNER' is set at org creation.
+  role          Role     @default(MEMBER)
+  workspaceId   String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lastSeenAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Audit: which user authored/updated a conversation label — handy for accountability.
+  labelAssignments ConversationLabel[]
+
+  @@index([workspaceId])
+  @@index([email])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOTS (chatbots)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Bot {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name          String
+  description   String?
+  // Public, non-secret URL-safe id used by the embed route (NOT the cuid id). Separating
+  // them means a leaked publicId can be rotated without rewriting bot relationships.
+  publicId      String   @unique @default(cuid())
+  status        BotStatus @default(ACTIVE)
+
+  // ─── AI configuration ───
+  // Default to Groq so a freshly created bot works out of the box with the project's
+  // configured provider (Groq key in .env). Other providers are selectable per-bot.
+  modelProvider ModelProvider @default(GROQ)
+  // Free-form model id within the provider (e.g. 'llama-3.3-70b-versatile', 'gpt-4o-mini').
+  modelId       String       @default("llama-3.3-70b-versatile")
+  temperature   Float        @default(0.3) // Low temp for grounded support answers.
+  systemPrompt  String?      // Owner-supplied personality/instructions.
+  persona       String?      // Soft 'personality' preset key (e.g. 'friendly').
+  language      String       @default("en")
+  memory        MemoryMode   @default(SESSION) // none | session (within a conversation).
+
+  // ─── Appearance (embed widget) ───
+  appearance    Json? // {primaryColor, accentColor, borderRadius, position, size, ...}
+  greeting      String?
+  quickReplies  String[]
+  welcomeMessage String?
+  avatarUrl     String?
+  logoUrl       String?
+
+  // ─── Behavior toggles ───
+  leadCapture   Boolean  @default(true)
+  leadFields    LeadField[] @default([NAME, EMAIL])
+  collectFeedback Boolean @default(true)
+  suggestQuestions Boolean @default(true)
+  showSources   Boolean  @default(true)
+  rateLimitPerMinute Int @default(30) // Per-end-user rate cap for this bot.
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // RAG + conversations + leads all hang off the bot.
+  documents     Document[]
+  conversations Conversation[]
+  leads         Lead[]
+  faqs          Faq[]
+  embedTokens   EmbedToken[]
+  stats         BotStat[]
+
+  @@index([workspaceId])
+  @@index([publicId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KNOWLEDGE BASE
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Document {
+  id            String   @id @default(cuid())
+  botId         String
+  bot           Bot       @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  type          DocumentType // pdf | docx | txt | csv | text | website | faq
+  title         String
+  sourceUrl     String? // For website crawl: the crawled URL. For upload: Cloudinary URL.
+  content       String? @db.Text // For text/faq: the raw text. For uploads: extracted text.
+  // The signed storage URL for the original file (Cloudinary). Null for text/faq.
+  storageUrl    String?
+
+  // Training lifecycle: PENDING → PROCESSING → READY → FAILED. 'READY' only once
+  // ALL chunks have embeddings. progress is 0..100 for the UI progress bar.
+  status        TrainingStatus @default(PENDING)
+  progress      Int       @default(0)
+  errorMessage  String?
+  chunkCount    Int       @default(0)
+  charCount     Int       @default(0)
+
+  // For website crawls: which subpages were ingested.
+  crawledUrls   String[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  chunks        DocumentChunk[]
+
+  @@index([botId])
+  @@index([status])
+  @@index([type])
+}
+
+// One Document is split into many chunks. Each chunk carries its own embedding so
+// retrieval is at chunk granularity (not whole-doc) — standard RAG practice.
+// The `embedding` column is the pgvector `vector(1536)` (OpenAI Ada/3-small dim).
+// For other embedding providers with different dims, add a parallel column family.
+model DocumentChunk {
+  id          String   @id @default(cuid())
+  documentId   String
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  botId        String   // Denormalized: lets us run vector search filtered by bot
+                       // without a join. Kept in sync; enforced at insert time.
+  content      String   @db.Text
+  // Chunk metadata for citation: which section/page/heading the answer came from.
+  chunkIndex   Int
+  sourceUrl    String?
+  page         Int?
+  heading      String?
+  tokenCount   Int      @default(0)
+
+  // pgvector column. Unsupported type => managed via migrations + $queryRaw only;
+  // Prisma can still read the row (embedding comes back as a string of floats).
+  embedding    Unsupported("vector(1536)")?
+
+  createdAt    DateTime @default(now())
+
+  // Composite index on botId for filtered ANN search ordering; plus HNSW index
+  // on the embedding created in the migration for fast cosine similarity.
+  @@index([botId])
+  @@index([documentId])
+  @@index([botId, documentId])
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  botId     String
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  question  String   @db.Text
+  answer    String   @db.Text
+  // Q+A pairs are optionally embedded as standalone chunks (type='faq') so they
+  // surface with high confidence for exact-ish queries.
+  embeddingId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([botId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONVERSATIONS & MESSAGES & LEADS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Conversation {
+  id            String    @id @default(cuid())
+  botId         String
+  bot           Bot       @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  // Denormalized workspaceId for fast tenant-scoped conversation queries — avoids
+  // a JOIN through Bot on every dashboard/analytics count. See Lead for the same
+  // pattern. Written by the chat API at conversation create time.
+  workspaceId   String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Anonymous end-user identifier. We don't PII-store by default — only the lead
+  // capture form does, which writes to Lead. sessionId links browser sessions.
+  endUserToken  String    // Set as a cookie by the embed widget; rotates on clear.
+  sessionId     String?
+  leadId        String? @unique // Captured lead, if the visitor filled the form.
+  lead          Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Enrichment for conversation management + analytics.
+  status        ConversationStatus @default(OPEN) // open | resolved | archived
+  labels        ConversationLabel[]
+  summary       String?
+
+  // Analytics rollup on the conversation (avoids COUNT(*) on messages for dashboards).
+  messageCount  Int       @default(0)
+  tokenUsage    Int       @default(0)
+  avgResponseMs Int?
+  satisfaction  Feedback? // 'up'/'down' if a feedback reaction was given
+
+  // `archivedAt` is the lone soft-delete: analytics still reads archived threads,
+  // but the UI hides them. Hard delete is separate and removes the record.
+  archivedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  messages      Message[]
+
+  @@index([botId])
+  @@index([workspaceId])
+  @@index([endUserToken])
+  @@index([status])
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([botId, createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           MessageRole // user | assistant | system
+  content        String   @db.Text
+  // Streamed token usage from the provider for cost dashboards.
+  promptTokens    Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens     Int      @default(0)
+  generationMs   Int?
+
+  // RAG citations: which chunks were retrieved to ground this assistant reply.
+  // Stored as JSON array of {chunkId, documentId, documentTitle, sourceUrl, page}.
+  citations      Json?
+
+  // Feedback on this specific assistant message (thumbs up/down + optional note).
+  feedback       Feedback?
+  feedbackNote   String?
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([role])
+  @@index([createdAt])
+}
+
+model Lead {
+  id           String   @id @default(cuid())
+  botId        String
+  bot          Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  workspaceId  String   // Denormalized for fast tenant-scoped leads queries.
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name         String?
+  email        String?
+  phone        String?
+  company      String?
+  // Free-form extra JSON for custom capture fields without schema migration churn.
+  metadata     Json?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  conversation Conversation?
+
+  @@index([workspaceId])
+  @@index([botId])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model ConversationLabel {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  label          String   // e.g. "billing", "bug", "pricing". Lowercased.
+  assignedById   String?
+  assignedBy     User?     @relation(fields: [assignedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+
+  @@unique([conversationId, label]) // Same label can't be added twice to one convo.
+  @@index([conversationId])
+  @@index([label])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EMBED (widget config tokens + access)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// A signed, revocable token bound to a bot + origin allowlist. The embed script
+// uses this to fetch widget config and stream chat WITHOUT dashboard auth. We can
+// rotate/revoke without touching the bot row.
+model EmbedToken {
+  id          String   @id @default(cuid())
+  botId       String
+  bot         Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  token       String   @unique // HMAC-signed public token (see services/embed).
+  allowedOrigins String[] // CORS allowlist for this token; ["*"] disables lock.
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([botId])
+  @@index([token])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ANALYTICS ROLLUPS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Daily rollup per bot so the analytics dashboard doesn't COUNT(*) over millions of
+// messages on each page load. Aggregated by a nightly job (or on-the-fly writeback).
+model BotStat {
+  id           String   @id @default(cuid())
+  botId        String
+  bot          Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  date         DateTime @db.Date // Day bucket (no time component).
+  conversations Int     @default(0)
+  messages     Int      @default(0)
+  totalTokens  Int      @default(0)
+  leadsCaptured Int     @default(0)
+  upVotes      Int      @default(0)
+  downVotes    Int      @default(0)
+  avgResponseMs Int?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // One row per (bot, day) — the unique constraint makes upsert-on-write idempotent.
+  @@unique([botId, date])
+  @@index([botId, date])
+}
+
+// Counters that don't fit a daily bucket (top questions, etc.) live as their own
+// model so the dashboard can render "top questions" without scanning every message.
+model TopQuestion {
+  id        String   @id @default(cuid())
+  botId     String
+  count     Int      @default(1)
+  question  String   @db.Text
+  // Normalized question text so "hi" and "Hi!" dedupe; we store the most-seen original.
+  normalizedQuestion String @db.Text
+  lastAskedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([botId, normalizedQuestion])
+  @@index([botId, count(sort: Desc)])
+}
+
+// Aggregate token usage per workspace for billing enforcement (entitlements).
+model UsageRecord {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  botId       String?
+  date        DateTime @db.Date
+  messagesCount Int   @default(0)
+  tokensCount Int    @default(0)
+  storageBytes BigInt  @default(0)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([workspaceId, date])
+  @@index([workspaceId, date])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTEGRATIONS / API KEYS / WEBHOOKS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  // Store HMAC of the key, never the raw secret. Raw key shown ONCE at creation.
+  keyHash     String   @unique
+  keyPrefix   String   // First 8 chars shown in the UI for identification.
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([keyHash])
+}
+
+model WebhookConfig {
+  id          String   @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  url         String
+  events      String[] // e.g. ['conversation.created', 'lead.captured']
+  secret      String   // Shared secret to sign outgoing webhooks (HMAC SHA-256).
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Plan {
+  FREE
+  STARTER
+  GROWTH
+  SCALE
+  ENTERPRISE
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum BotStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ModelProvider {
+  OPENAI
+  ANTHROPIC
+  GROQ
+}
+
+enum MemoryMode {
+  NONE      // Stateless — each message independent.
+  SESSION   // Remember within a single conversation.
+}
+
+enum DocumentType {
+  PDF
+  DOCX
+  TXT
+  CSV
+  TEXT
+  WEBSITE
+  FAQ
+}
+
+enum TrainingStatus {
+  PENDING   // Awaiting queue pick-up.
+  PROCESSING // Worker parsing + chunking + embedding.
+  READY
+  FAILED
+}
+
+enum ConversationStatus {
+  OPEN
+  RESOLVED
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum Feedback {
+  UP
+  DOWN
+}
+
+enum LeadField {
+  NAME
+  EMAIL
+  PHONE
+  COMPANY
+}

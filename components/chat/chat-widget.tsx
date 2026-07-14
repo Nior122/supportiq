@@ -1,0 +1,307 @@
+/**
+ * WHY THIS FILE EXISTS
+ * -------------------
+ * Reusable chat widget component. Used in both:
+ *  1. The dashboard playground (for testing bots)
+ *  2. The embeddable widget (iframe version)
+ *
+ * It handles the full chat lifecycle:
+ *  - Rendering the message list with markdown
+ *  - Sending messages via POST /api/chat
+ *  - Streaming responses token-by-token
+ *  - Auto-scrolling to the latest message
+ *  - Citation display
+ *
+ * The component is fully self-contained — it takes a `botPublicId` and
+ * optionally a `greeting` message, and manages all state internally.
+ * No external state management needed for a single conversation.
+ */
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Send, Bot, User, Copy, Check } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  citations?: Array<{
+    content: string;
+    documentName: string;
+    heading: string | null;
+    similarity: number;
+  }>;
+}
+
+interface ChatWidgetProps {
+  botPublicId: string;
+  greeting?: string;
+  quickReplies?: string[];
+  className?: string;
+}
+
+export function ChatWidget({
+  botPublicId,
+  greeting,
+  quickReplies = [],
+}: ChatWidgetProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Add greeting message on mount
+  useEffect(() => {
+    if (greeting) {
+      setMessages([
+        {
+          id: "greeting",
+          role: "assistant",
+          content: greeting,
+        },
+      ]);
+    }
+  }, [greeting]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim() || isLoading) return;
+
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: content.trim(),
+      };
+
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: "",
+      };
+
+      setMessages((prev) => [...prev, userMessage, assistantMessage]);
+      setInput("");
+      setIsLoading(true);
+
+      try {
+        // Build message history for context
+        const apiMessages = [...messages, userMessage].map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            botPublicId,
+            messages: apiMessages,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to send message");
+        }
+
+        // Stream the response
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              // Flush any remaining bytes held in the decoder's internal buffer.
+              // Without this final decode, multi-byte UTF-8 characters split
+              // across chunk boundaries (or the last partial chunk) are lost,
+              // causing the response to appear truncated.
+              const tail = decoder.decode();
+              if (tail) {
+                accumulated += tail;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantMessage.id
+                      ? { ...m, content: accumulated }
+                      : m,
+                  ),
+                );
+              }
+              break;
+            }
+
+            const chunk = decoder.decode(value, { stream: true });
+            accumulated += chunk;
+
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMessage.id
+                  ? { ...m, content: accumulated }
+                  : m,
+              ),
+            );
+          }
+        }
+      } catch (err) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMessage.id
+              ? {
+                  ...m,
+                  content: `Sorry, something went wrong. ${err instanceof Error ? err.message : "Please try again."}`,
+                }
+              : m,
+          ),
+        );
+      } finally {
+        setIsLoading(false);
+        inputRef.current?.focus();
+      }
+    },
+    [botPublicId, messages, isLoading],
+  );
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    sendMessage(input);
+  }
+
+  function handleQuickReply(reply: string) {
+    sendMessage(reply);
+  }
+
+  function copyMessage(content: string, id: string) {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+          >
+            {msg.role === "assistant" && (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+            )}
+
+            <div
+              className={`group relative max-w-[80%] rounded-xl px-4 py-3 text-sm ${
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted"
+              }`}
+            >
+              {msg.role === "assistant" ? (
+                <div className="prose-chat">
+                  <ReactMarkdown>{msg.content || "…"}</ReactMarkdown>
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap">{msg.content}</p>
+              )}
+
+              {/* Copy button */}
+              {msg.role === "assistant" && msg.content && (
+                <button
+                  onClick={() => copyMessage(msg.content, msg.id)}
+                  className="absolute -right-2 -top-2 hidden rounded-md border bg-background p-1 opacity-0 transition-opacity group-hover:block group-hover:opacity-100"
+                >
+                  {copiedId === msg.id ? (
+                    <Check className="h-3 w-3 text-success" />
+                  ) : (
+                    <Copy className="h-3 w-3 text-muted-foreground" />
+                  )}
+                </button>
+              )}
+
+              {/* Citations */}
+              {msg.citations && msg.citations.length > 0 && (
+                <div className="mt-3 border-t pt-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    Sources:
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {msg.citations.map((citation, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center rounded-md bg-background/50 px-2 py-0.5 text-xs"
+                      >
+                        {citation.documentName}
+                        {citation.heading && ` — ${citation.heading}`}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {msg.role === "user" && (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                <User className="h-4 w-4 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick replies */}
+      {quickReplies.length > 0 && messages.length <= 1 && (
+        <div className="flex flex-wrap gap-2 px-4 pb-2">
+          {quickReplies.map((reply) => (
+            <Button
+              key={reply}
+              variant="outline"
+              size="sm"
+              onClick={() => handleQuickReply(reply)}
+              disabled={isLoading}
+              className="text-xs"
+            >
+              {reply}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {/* Input area */}
+      <form
+        onSubmit={handleSubmit}
+        className="flex gap-2 border-t p-4"
+      >
+        <Input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message…"
+          disabled={isLoading}
+          className="flex-1"
+          autoFocus
+        />
+        <Button
+          type="submit"
+          size="icon"
+          disabled={!input.trim() || isLoading}
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </form>
+    </div>
+  );
+}
