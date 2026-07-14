@@ -222,10 +222,17 @@ function FileUploadCard({
           variant: "destructive",
         });
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const description = msg.includes("Body exceeded")
+        || msg.includes("body exceeded")
+        || msg.includes("Payload")
+        || msg.includes("too large")
+        ? "File is too large. The server limit is 20 MB — try a smaller PDF."
+        : "An unexpected error occurred. Check the server logs for details.";
       toast({
         title: "Upload failed",
-        description: "An unexpected error occurred.",
+        description,
         variant: "destructive",
       });
     } finally {

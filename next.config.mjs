@@ -25,6 +25,12 @@ const nextConfig = {
       "date-fns",
       "react-markdown",
     ],
+    // Server actions handle file uploads (PDF up to 20 MB). Next.js 15 defaults
+    // to 1 MB — far too low for real documents. This must match MAX_FILE_SIZE in
+    // app/dashboard/bots/[botId]/knowledge/actions.ts.
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
   },
   images: {
     formats: ["image/avif", "image/webp"],
