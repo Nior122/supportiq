@@ -48,6 +48,8 @@ export async function retrieveRelevantChunks(
   // The HNSW index accelerates this query for large corpora.
   const vectorString = `[${queryVector.join(",")}]`;
 
+  console.log(`[retrieval] Searching botId=${botId}, queryLen=${query.length}, topK=${topK}`);
+
   const results: Array<{
     content: string;
     chunkIndex: number;
@@ -68,6 +70,8 @@ export async function retrieveRelevantChunks(
     ORDER BY dc.embedding <=> ${vectorString}::vector
     LIMIT ${topK}
   `;
+
+  console.log(`[retrieval] Found ${results.length} chunks`);
 
   return results;
 }

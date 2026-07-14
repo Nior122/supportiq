@@ -16,7 +16,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireSession } from "@/lib/auth/session";
-import { getBotByPublicId } from "@/services/bot";
+import { getBotByPublicId, getBotStats } from "@/services/bot";
 import { BotSettingsForm } from "./bot-settings-form";
 import { EmbedCode } from "./embed-code";
 import { ChatWidget } from "@/components/chat/chat-widget";
@@ -45,6 +45,13 @@ export default async function BotDetailPage({
     bot = await getBotByPublicId(session.workspaceId!, botId);
   } catch {
     notFound();
+  }
+
+  let stats;
+  try {
+    stats = await getBotStats(session.workspaceId!, botId);
+  } catch {
+    stats = null;
   }
 
   const status = statusConfig[bot.status] ?? statusConfig.DRAFT!;
@@ -85,7 +92,7 @@ export default async function BotDetailPage({
             <MessageSquare className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Conversations</p>
-              <p className="text-lg font-bold">—</p>
+              <p className="text-lg font-bold">{stats?.conversationCount ?? 0}</p>
             </div>
           </CardContent>
         </Card>
@@ -94,7 +101,7 @@ export default async function BotDetailPage({
             <FileText className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Documents</p>
-              <p className="text-lg font-bold">—</p>
+              <p className="text-lg font-bold">{stats?.documentCount ?? 0}</p>
             </div>
           </CardContent>
         </Card>
@@ -103,7 +110,9 @@ export default async function BotDetailPage({
             <Clock className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Avg Response</p>
-              <p className="text-lg font-bold">—</p>
+              <p className="text-lg font-bold">
+                {stats?.avgResponseMs != null ? `${Math.round(stats.avgResponseMs)}ms` : "—"}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -112,7 +121,7 @@ export default async function BotDetailPage({
             <BarChart3 className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Today&apos;s Messages</p>
-              <p className="text-lg font-bold">—</p>
+              <p className="text-lg font-bold">{stats?.todayMessages ?? 0}</p>
             </div>
           </CardContent>
         </Card>

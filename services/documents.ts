@@ -81,7 +81,9 @@ export async function createDocument(
     });
   }
 
-  return doc;
+  // Re-fetch to return the CURRENT status (not the stale PENDING from creation).
+  // processDocument may have set READY or the catch above may have set FAILED.
+  return prisma.document.findUniqueOrThrow({ where: { id: doc.id } });
 }
 
 /**
@@ -100,6 +102,7 @@ async function processDocument(
   const scoped = scopedPrisma({ workspaceId });
 
   // Mark as processing
+  console.log(`[doc:${documentId}] Starting processing — type=${input.type}`);
   await scoped.document.update({
     where: { id: documentId },
     data: { status: "PROCESSING", progress: 5 },
@@ -164,7 +167,9 @@ async function processDocument(
   if (!docRow) throw new Error("Document disappeared during processing");
 
   // Embed in batches (embedMany handles internal chunking)
+  console.log(`[doc:${documentId}] Embedding ${chunks.length} chunks...`);
   const embeddings = await embedMany(chunks.map((c) => c.content));
+  console.log(`[doc:${documentId}] Got ${embeddings.length} embeddings`);
 
   // Store each chunk with its vector via $executeRaw.
   // Prisma cannot write Unsupported("vector(1536)") columns through typed
@@ -193,6 +198,7 @@ async function processDocument(
   }
 
   // Mark as complete
+  console.log(`[doc:${documentId}] Processing complete — ${chunks.length} chunks stored`);
   await scoped.document.update({
     where: { id: documentId },
     data: { status: "READY", progress: 100 },

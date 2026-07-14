@@ -124,6 +124,7 @@ export async function POST(request: NextRequest) {
     let retrievedChunks: Awaited<ReturnType<typeof retrieveRelevantChunks>> = [];
     try {
       retrievedChunks = await retrieveRelevantChunks(bot.id, lastUserMessage.content, 5);
+      log.info("RAG retrieval completed", { chunksFound: retrievedChunks.length, botId: bot.id });
     } catch (err) {
       log.error("RAG retrieval failed, proceeding without context", { error: String(err) });
       retrievedChunks = [];
