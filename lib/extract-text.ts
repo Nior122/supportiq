@@ -12,9 +12,12 @@
  * in server components and server actions, so `import * as cheerio from "cheerio"`
  * works in this server-side code. (Don't import this file from a client component.)
  */
-// pdf-parse is CJS-only; use require() to avoid ESM default-export issue in Next.js
+// Import pdf-parse/lib/pdf-parse.js directly to bypass pdf-parse's index.js
+// which contains test code (Fs.readFileSync('./test/data/...')) that runs when
+// module.parent is undefined — the case in webpack/serverless (Vercel) bundles,
+// causing ENOENT crashes on upload.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse") as (
+const pdfParse = require("pdf-parse/lib/pdf-parse.js") as (
   buffer: Buffer,
 ) => Promise<{ text: string }>;
 import * as cheerio from "cheerio";
