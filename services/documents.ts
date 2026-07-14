@@ -180,12 +180,11 @@ async function processDocument(
   // create — it treats the value as JSON and pgvector rejects it.
   // Raw SQL with ::vector cast is the canonical approach for pgvector + Prisma.
   const vectorDim = embeddings[0]?.length ?? 1024;
+  const PROGRESS_EVERY = Math.max(1, Math.floor(chunks.length / 5)); // update ~5 times
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i]!;
     const vec = embeddings[i]!;
-    // Safety guard: reject a dimension mismatch before it lands in the
-    // vector(1024) column (else pgvector throws and the whole doc fails).
     if (vec.length !== vectorDim) {
       throw new Error(
         `Embedding dimension mismatch for chunk ${i}: got ${vec.length}, expected ${vectorDim}. ` +
@@ -201,12 +200,14 @@ async function processDocument(
         (gen_random_uuid(), ${documentId}, ${docRow.botId}, ${chunk.content}, ${chunk.index}, ${chunk.heading ?? null}, ${chunk.page ?? null}, ${chunk.tokenCount}, ${vectorLiteral}::vector, NOW())
     `;
 
-    // Update progress
-    const progress = 35 + Math.round(((i + 1) / chunks.length) * 55);
-    await scoped.document.update({
-      where: { id: documentId },
-      data: { progress },
-    });
+    // Update progress less frequently to reduce DB round trips
+    if ((i + 1) % PROGRESS_EVERY === 0 || i === chunks.length - 1) {
+      const progress = 35 + Math.round(((i + 1) / chunks.length) * 55);
+      await scoped.document.update({
+        where: { id: documentId },
+        data: { progress },
+      });
+    }
   }
 
   // Mark as complete
