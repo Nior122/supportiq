@@ -5,7 +5,8 @@
   "description": "SupportIQ — AI-powered customer support chatbot SaaS. Create, train, embed, and analyze AI assistants for your business.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
