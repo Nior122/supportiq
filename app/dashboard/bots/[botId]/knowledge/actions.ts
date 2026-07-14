@@ -16,6 +16,7 @@
 "use server";
 
 import { z } from "zod";
+import { prisma } from "@/lib/prisma";
 import { requireWorkspaceId } from "@/lib/auth/session";
 import { createDocument, deleteDocument, listDocuments } from "@/services/documents";
 import type { ActionResponse } from "@/types";
@@ -73,9 +74,15 @@ export async function uploadDocumentAction(
     // Processing is synchronous — if it failed, surface the reason to the user
     // rather than silently returning "success" with a FAILED document.
     if (doc.status === "FAILED") {
+      // Re-fetch to get the errorMessage that processDocument stored
+      const failedDoc = await prisma.document.findUnique({
+        where: { id: doc.id },
+        select: { errorMessage: true },
+      });
+      const detail = failedDoc?.errorMessage ?? "Unknown error";
       return {
         ok: false,
-        error: `Document was uploaded but processing failed. The file may be corrupted, password-protected, or contain no readable text. If this persists, check your JINAAI_API_KEY environment variable.`,
+        error: `Processing failed: ${detail}`,
       };
     }
 
@@ -108,9 +115,14 @@ export async function addWebsiteAction(
     });
 
     if (doc.status === "FAILED") {
+      const failedDoc = await prisma.document.findUnique({
+        where: { id: doc.id },
+        select: { errorMessage: true },
+      });
+      const detail = failedDoc?.errorMessage ?? "Unknown error";
       return {
         ok: false,
-        error: `URL was added but processing failed. The page may be unreachable, return non-HTML content, or your JINAAI_API_KEY is not configured.`,
+        error: `Processing failed: ${detail}`,
       };
     }
 

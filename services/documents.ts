@@ -68,15 +68,19 @@ export async function createDocument(
   });
 
   // Process synchronously (would be a background job in production)
+  let processingError: string | null = null;
   try {
     await processDocument(workspaceId, doc.id, input);
   } catch (err) {
+    processingError =
+      err instanceof Error ? err.message : String(err);
     console.error(`Document processing failed for ${doc.id}:`, err);
     await scoped.document.update({
       where: { id: doc.id },
       data: {
         status: "FAILED",
         progress: 0,
+        errorMessage: processingError,
       },
     });
   }
