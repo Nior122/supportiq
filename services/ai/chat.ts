@@ -45,10 +45,17 @@ function getModel(provider: ModelProvider, modelId: string) {
       return anthropic(modelId);
 
     case "GROQ": {
-      // Groq uses an OpenAI-compatible API
+      // Groq uses an OpenAI-compatible API. `compatibility: "compatible"` is
+      // REQUIRED: in @ai-sdk/openai v1 the default ("strict") mode sends the
+      // request in a shape Groq accepts but then stream-parses in a way that
+      // drops every text delta — `streamText` yields ZERO text chunks and the
+      // chat responds with a 200 + empty body (the "bots no longer responding"
+      // bug). "compatible" mode issues the plain chat-completions request
+      // Groq streams correctly. See https://ai-sdk.dev/providers/openai
       const groq = createOpenAI({
         baseURL: "https://api.groq.com/openai/v1",
         apiKey: process.env.GROQ_API_KEY,
+        compatibility: "compatible",
       });
       return groq(modelId);
     }
@@ -59,13 +66,16 @@ function getModel(provider: ModelProvider, modelId: string) {
 }
 
 /**
- * Stream a chat response. Returns an AsyncIterable that yields text chunks.
+ * Stream a chat response. Returns the full AI SDK `streamText` result so the
+ * caller can turn it into an HTTP response via `.toTextStreamResponse()`
+ * (preferred) or consume `.textStream` directly.
  *
- * Usage in a Route Handler:
- * ```ts
- * const stream = await chatStream({ provider, modelId, messages });
- * return new Response(stream, { headers: { "Content-Type": "text/plain" } });
- * ```
+ * Why return the result object (not just `.textStream`): AI SDK v4's
+ * `textStream` is a single-consumption async iterable. Consuming it through a
+ * hand-rolled ReadableStream can silently yield zero chunks under certain
+ * Next.js runtime buffering conditions — `toTextStreamResponse()` is the SDK's
+ * canonical, battle-tested path and flushes correctly. Keeping the result
+ * here lets the route use that helper while `chatComplete` still reads `.textStream`.
  */
 export async function chatStream(options: ChatOptions) {
   const { provider, modelId, messages, temperature = 0.7, systemPrompt } = options;
@@ -86,7 +96,7 @@ export async function chatStream(options: ChatOptions) {
     maxTokens: 8192,
   });
 
-  return result.textStream;
+  return result;
 }
 
 /**

@@ -138,7 +138,11 @@ export async function POST(request: NextRequest) {
     );
 
     // Step 5: Stream the AI response
-    const stream = await chatStream({
+    // chatStream returns the AI SDK streamText result; toTextStreamResponse()
+    // is the canonical way to pipe it to an HTTP client (flushes correctly,
+    // handles client disconnect/abort). The widget reads this as a plain
+    // text stream via response.body.getReader().
+    const result = await chatStream({
       provider: bot.modelProvider,
       modelId: bot.modelId,
       messages: body.messages.map((m) => ({
@@ -168,47 +172,13 @@ export async function POST(request: NextRequest) {
       })),
     );
 
-    // Return the stream as a ReadableStream.
-    // We use a pull-based ReadableStream (no high-water-mark buffering) so every
-    // chunk is flushed to the client immediately. The `cancel` handler ensures
-    // the upstream AI stream is properly aborted if the client disconnects,
-    // preventing orphaned provider connections.
-    const encoder = new TextEncoder();
-    let streamIterator: AsyncIterator<unknown> | undefined;
-    let cancelled = false;
-
-    const readableStream = new ReadableStream({
-      async pull(controller) {
-        try {
-          if (!streamIterator) {
-            streamIterator = stream[Symbol.asyncIterator]();
-          }
-          const { done, value } = await streamIterator.next();
-          if (done || cancelled) {
-            controller.close();
-            return;
-          }
-          if (value) {
-            controller.enqueue(encoder.encode(value as string));
-          }
-        } catch (err) {
-          log.error("Stream error", { error: String(err) });
-          controller.error(err);
-        }
-      },
-      cancel() {
-        cancelled = true;
-        // Abort the upstream iterator if the client disconnects
-        streamIterator?.return?.().catch(() => {});
-      },
-    });
-
     // Don't await conversationPromise — let it run in background
     conversationPromise.catch((err) =>
       log.error("Failed to save conversation", { error: String(err) }),
     );
 
-    return new Response(readableStream, {
+    // toTextStreamResponse emits the raw text chunks the widget decodes.
+    const response = result.toTextStreamResponse({
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",
@@ -218,6 +188,8 @@ export async function POST(request: NextRequest) {
         "X-RateLimit-Reset": String(rl.reset),
       },
     });
+
+    return response;
   } catch (err) {
     log.error("Chat API error", { error: String(err) });
     return Response.json(
