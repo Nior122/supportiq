@@ -146,6 +146,7 @@ export default async function BotDetailPage({
               <ChatWidget
                 key={bot.publicId}
                 botPublicId={bot.publicId}
+                botName={bot.name}
                 greeting={
                   bot.greeting ?? `Hi! I'm ${bot.name}. How can I help you today?`
                 }

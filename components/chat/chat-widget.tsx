@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Bot, User, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { TypingIndicator } from "./typing-indicator";
 
 interface Message {
   id: string;
@@ -34,10 +35,18 @@ interface Message {
     heading: string | null;
     similarity: number;
   }>;
+  /**
+   * Transient typing-indicator status for an in-flight assistant message,
+   * driven by the inband `§STATUS:researching§` / `§STATUS:typing§` sentinels
+   * the chat route emits before the first text token. Cleared (set to
+   * undefined) once real text starts populating the bubble.
+   */
+  typingStatus?: "researching" | "typing";
 }
 
 interface ChatWidgetProps {
   botPublicId: string;
+  botName?: string;
   greeting?: string;
   quickReplies?: string[];
   className?: string;
@@ -45,6 +54,7 @@ interface ChatWidgetProps {
 
 export function ChatWidget({
   botPublicId,
+  botName,
   greeting,
   quickReplies = [],
 }: ChatWidgetProps) {
@@ -87,6 +97,9 @@ export function ChatWidget({
         id: `assistant-${Date.now()}`,
         role: "assistant",
         content: "",
+        // Show the Researching pill immediately, before the HTTP response even
+        // arrives — the route will refine this to "typing" via its first sentinel.
+        typingStatus: "researching",
       };
 
       setMessages((prev) => [...prev, userMessage, assistantMessage]);
@@ -114,10 +127,61 @@ export function ChatWidget({
           throw new Error(error.error || "Failed to send message");
         }
 
-        // Stream the response
+        // Stream the response. The route prepends inband STATUS sentinels
+        // (§STATUS:researching§ / §STATUS:typing§) before the real text. We must
+        // CONSUME these here so they drive the typing indicator and never reach
+        // the rendered message or the accumulated text.
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let accumulated = "";
+        // `pending` holds decoded bytes that haven't been committed to
+        // `accumulated` yet. A sentinel can straddle a chunk boundary, so we only
+        // commit up to a safe boundary — the byte run before any pending partial
+        // sentinel (a trailing "§") is committed; everything from the last "§"
+        // onward is held here until the next chunk completes or disproves it.
+        let pending = "";
+        let lastStatus: "researching" | "typing" | undefined;
+        const SENTINEL = /§STATUS:(researching|typing)§/g;
+
+        // Pull complete sentinels out of `pending`, record the latest status they
+        // carry, and commit all text that isn't part of an in-progress sentinel.
+        // Returns the committed text; leaves any trailing partial sentinel (or
+        // leftover bytes) in `pending`.
+        const commitSafeText = (id: string): string => {
+          let committed = "";
+          SENTINEL.lastIndex = 0;
+          // Walk through `pending`, consuming full sentinels and keeping any text
+          // before them. We re-run after each sentinel because sentinels can be
+          // adjacent to further text or another sentinel.
+          let searchFrom = 0;
+          while (searchFrom < pending.length) {
+            SENTINEL.lastIndex = searchFrom;
+            const match = SENTINEL.exec(pending);
+            if (!match) break;
+            committed += pending.slice(searchFrom, match.index);
+            lastStatus = match[1] as "researching" | "typing";
+            searchFrom = match.index + match[0].length;
+          }
+          // `committed` now holds everything up to the last consumed sentinel, but
+          // may include a trailing text run after the final sentinel that could
+          // itself start an incomplete sentinel. Detect a pending "§" boundary:
+          const lastSentinelStart = pending.indexOf("§", searchFrom);
+          if (lastSentinelStart === -1) {
+            // No § beyond our consumed sentinels → commit all remaining text and
+            // clear the pending hold.
+            committed += pending.slice(searchFrom);
+            pending = "";
+          } else if (lastSentinelStart === searchFrom) {
+            // Remaining bytes start with § but didn't form a complete sentinel →
+            // it's a partial sentinel. Hold it back; don't commit.
+            pending = pending.slice(lastSentinelStart);
+          } else {
+            // Some text, THEN a partial sentinel. Commit the text, hold the §… tail.
+            committed += pending.slice(searchFrom, lastSentinelStart);
+            pending = pending.slice(lastSentinelStart);
+          }
+          return committed;
+        };
 
         if (reader) {
           while (true) {
@@ -127,13 +191,19 @@ export function ChatWidget({
               // Without this final decode, multi-byte UTF-8 characters split
               // across chunk boundaries (or the last partial chunk) are lost,
               // causing the response to appear truncated.
-              const tail = decoder.decode();
-              if (tail) {
-                accumulated += tail;
+              const endTail = decoder.decode();
+              if (endTail) pending += endTail;
+              // At stream end there's no next chunk to complete a sentinel, so any
+              // leftover §… is NOT a sentinel (a real sentinel would have closed
+              // with a trailing § already consumed above). Strip stray § and commit.
+              const finalText = pending.replace(/§STATUS:\w*§?|§/g, "");
+              pending = "";
+              if (finalText) {
+                accumulated += finalText;
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMessage.id
-                      ? { ...m, content: accumulated }
+                      ? { ...m, content: accumulated, typingStatus: undefined }
                       : m,
                   ),
                 );
@@ -142,12 +212,23 @@ export function ChatWidget({
             }
 
             const chunk = decoder.decode(value, { stream: true });
-            accumulated += chunk;
+            pending += chunk;
+            const committed = commitSafeText(assistantMessage.id);
+
+            if (committed) {
+              accumulated += committed;
+            }
 
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === assistantMessage.id
-                  ? { ...m, content: accumulated }
+                  ? {
+                      ...m,
+                      content: accumulated,
+                      typingStatus: accumulated
+                        ? undefined // real text has arrived — hide the indicator
+                        : (lastStatus ?? m.typingStatus),
+                    }
                   : m,
               ),
             );
@@ -202,17 +283,33 @@ export function ChatWidget({
               </div>
             )}
 
-            <div
-              className={`group relative max-w-[80%] rounded-xl px-4 py-3 text-sm ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
-              }`}
-            >
+            <div className="flex flex-col">
+              {msg.role === "assistant" && botName && msg.id !== "greeting" && (
+                <span className="mb-1 text-xs font-semibold text-foreground/80">
+                  {botName}
+                </span>
+              )}
+
+              <div
+                className={`group relative max-w-[80%] rounded-xl px-4 py-3 text-sm ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}
+              >
               {msg.role === "assistant" ? (
-                <div className="prose-chat">
-                  <ReactMarkdown>{msg.content || "…"}</ReactMarkdown>
-                </div>
+                // While the response is still streaming and no text has
+                // arrived yet, show the animated typing indicator (pill +
+                // bouncing dots) instead of an empty / placeholder bubble.
+                // Once the first real token lands, `content` is non-empty and
+                // we switch to rendering markdown.
+                !msg.content && msg.typingStatus ? (
+                  <TypingIndicator status={msg.typingStatus} />
+                ) : (
+                  <div className="prose-chat">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                )
               ) : (
                 <p className="whitespace-pre-wrap">{msg.content}</p>
               )}
@@ -250,6 +347,7 @@ export function ChatWidget({
                   </div>
                 </div>
               )}
+              </div>
             </div>
 
             {msg.role === "user" && (

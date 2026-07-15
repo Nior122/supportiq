@@ -67,7 +67,7 @@ export default async function TestBotPage({
 
       <Card className="h-[calc(100dvh-260px)]">
         <CardContent className="h-full p-0">
-          <ChatWidget key={bot.publicId} botPublicId={bot.publicId} greeting={greeting} />
+          <ChatWidget key={bot.publicId} botPublicId={bot.publicId} botName={bot.name} greeting={greeting} />
         </CardContent>
       </Card>
     </div>

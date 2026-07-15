@@ -138,10 +138,21 @@ export async function POST(request: NextRequest) {
     );
 
     // Step 5: Stream the AI response
-    // chatStream returns the AI SDK streamText result; toTextStreamResponse()
-    // is the canonical way to pipe it to an HTTP client (flushes correctly,
-    // handles client disconnect/abort). The widget reads this as a plain
-    // text stream via response.body.getReader().
+    // chatStream returns the AI SDK streamText result. We pipe `result.textStream`
+    // through a custom ReadableStream (instead of result.toTextStreamResponse()) so
+    // we can inject lightweight STATUS SENTINELS the widget reads to show a
+    // "Searching knowledge base…" / "Thinking…" typing indicator before the first
+    // real token arrives.
+    //
+    // Sentinels use the § delimiter (vanishingly rare in natural chat text) and are
+    // formatted `§STATUS:<state>§`. Two are emitted:
+    //   §STATUS:researching§ — flushed immediately as the stream opens, so the
+    //     widget shows the Researching pill the instant the request is accepted
+    //     (this covers the RAG-retrieval + Groq-warmup latency before token 0).
+    //   §STATUS:typing§        — flushed right before the first real text token,
+    //     so the widget swaps the pill Researching → Typing as generation begins.
+    // The widget CONSUMES sentinels before accumulating any text, so they never
+    // leak into the rendered answer or the saved message.
     const result = await chatStream({
       provider: bot.modelProvider,
       modelId: bot.modelId,
@@ -177,19 +188,62 @@ export async function POST(request: NextRequest) {
       log.error("Failed to save conversation", { error: String(err) }),
     );
 
-    // toTextStreamResponse emits the raw text chunks the widget decodes.
-    const response = result.toTextStreamResponse({
+    // The AI SDK's `textStream` is a single-consumption async iterable that
+    // silently yields zero chunks when iterated through a hand-rolled
+    // ReadableStream (Next.js runtime buffering condition). The canonical path
+    // is `result.toTextStreamResponse()` — which returns a Response whose body
+    // is a working ReadableStream. We grab that body and wrap it in a new
+    // ReadableStream that injects §STATUS sentinels without touching the SDK's
+    // internal streaming pipeline.
+    const encoder = new TextEncoder();
+    let isFirstTextChunk = true;
+    const sdkResponse = result.toTextStreamResponse({
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
-        "X-Accel-Buffering": "no", // Disable nginx buffering
+        "X-Accel-Buffering": "no",
         "X-RateLimit-Remaining": String(rl.remaining),
         "X-RateLimit-Reset": String(rl.reset),
       },
     });
 
-    return response;
+    const sdkBodyReader = sdkResponse.body!.getReader();
+    const stream = new ReadableStream<Uint8Array>({
+      // start() runs during construction — before the consumer even begins
+      // reading — so the researching sentinel is the very first byte the
+      // client receives, guaranteeing the "Searching knowledge base…" pill
+      // appears the instant the HTTP response opens (covers RAG + Groq
+      // warmup latency before token 0).
+      start(controller) {
+        controller.enqueue(encoder.encode("§STATUS:researching§"));
+      },
+      async pull(controller) {
+        try {
+          const { done, value } = await sdkBodyReader.read();
+          if (done) {
+            controller.close();
+            return;
+          }
+          // Swap the pill Researching → Typing right before the first real token.
+          if (isFirstTextChunk) {
+            isFirstTextChunk = false;
+            controller.enqueue(encoder.encode("§STATUS:typing§"));
+          }
+          controller.enqueue(value);
+        } catch (err) {
+          log.error("Stream error during chat", { error: String(err) });
+          controller.error(err);
+        }
+      },
+      cancel() {
+        sdkBodyReader.cancel();
+      },
+    });
+
+    return new Response(stream, {
+      headers: sdkResponse.headers,
+    });
   } catch (err) {
     log.error("Chat API error", { error: String(err) });
     return Response.json(

@@ -38,6 +38,7 @@ export default async function EmbedChatPage({ searchParams }: EmbedChatPageProps
     where: { publicId: botId },
     select: {
       id: true,
+      name: true,
       status: true,
       greeting: true,
       appearance: true,
@@ -68,6 +69,7 @@ export default async function EmbedChatPage({ searchParams }: EmbedChatPageProps
     >
       <ChatWidget
         botPublicId={botId}
+        botName={bot.name}
         greeting={bot.greeting ?? undefined}
         quickReplies={bot.quickReplies as string[]}
       />

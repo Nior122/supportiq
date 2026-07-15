@@ -58,6 +58,21 @@ export async function getAnalyticsOverview(
   const prevFrom = new Date(from.getTime() - periodMs);
   const prevTo = from;
 
+  // Neon HTTP doesn't support nested relation filters (e.g.
+  // `conversation: { workspaceId }` on Message). We get conversation IDs
+  // first, then filter messages by those IDs.
+  const currentConvos = await scoped.conversation.findMany({
+    where: { createdAt: { gte: from, lte: to } },
+    select: { id: true },
+  });
+  const currentConvoIds = currentConvos.map((c) => c.id);
+
+  const prevConvos = await scoped.conversation.findMany({
+    where: { createdAt: { gte: prevFrom, lte: prevTo } },
+    select: { id: true },
+  });
+  const prevConvoIds = prevConvos.map((c) => c.id);
+
   const [
     totalConversations,
     totalMessages,
@@ -67,15 +82,18 @@ export async function getAnalyticsOverview(
     prevMessages,
     prevLeads,
   ] = await Promise.all([
+    // Already have currentConvoIds.length, but use count for consistency
     scoped.conversation.count({
       where: { createdAt: { gte: from, lte: to } },
     }),
-    scoped.message.count({
-      where: {
-        conversation: { workspaceId },
-        createdAt: { gte: from, lte: to },
-      },
-    }),
+    currentConvoIds.length > 0
+      ? prisma.message.count({
+          where: {
+            conversationId: { in: currentConvoIds },
+            createdAt: { gte: from, lte: to },
+          },
+        })
+      : Promise.resolve(0),
     scoped.lead.count({
       where: { createdAt: { gte: from, lte: to } },
     }),
@@ -86,12 +104,14 @@ export async function getAnalyticsOverview(
     scoped.conversation.count({
       where: { createdAt: { gte: prevFrom, lte: prevTo } },
     }),
-    scoped.message.count({
-      where: {
-        conversation: { workspaceId },
-        createdAt: { gte: prevFrom, lte: prevTo },
-      },
-    }),
+    prevConvoIds.length > 0
+      ? prisma.message.count({
+          where: {
+            conversationId: { in: prevConvoIds },
+            createdAt: { gte: prevFrom, lte: prevTo },
+          },
+        })
+      : Promise.resolve(0),
     scoped.lead.count({
       where: { createdAt: { gte: prevFrom, lte: prevTo } },
     }),
@@ -174,8 +194,18 @@ export async function getTopQuestions(
 ): Promise<TopQuestionRow[]> {
   const scoped = scopedPrisma({ workspaceId });
 
-  const questions = await scoped.topQuestion.findMany({
-    where: { bot: { workspaceId } },
+  // TopQuestion has no workspaceId — it links to workspace through Bot.
+  // Neon HTTP doesn't support nested relation filters (`bot: { workspaceId }`),
+  // so we first fetch the workspace's bot IDs, then filter directly.
+  const bots = await scoped.bot.findMany({
+    select: { id: true },
+  });
+  const botIds = bots.map((b) => b.id);
+
+  if (botIds.length === 0) return [];
+
+  const questions = await prisma.topQuestion.findMany({
+    where: { botId: { in: botIds } },
     orderBy: { count: "desc" },
     take: limit,
     select: {

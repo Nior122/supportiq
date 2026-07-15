@@ -43,19 +43,39 @@ function TrendBadge({ value }: { value: number }) {
 }
 
 export default async function AnalyticsPage() {
-  const session = await requireSession();
-  const workspaceId = session.workspaceId!;
-
   // Default to last 30 days
   const to = new Date();
   const from = new Date();
   from.setDate(from.getDate() - 30);
 
-  const [overview, topQuestions, satisfaction] = await Promise.all([
-    getAnalyticsOverview(workspaceId, { from, to }),
-    getTopQuestions(workspaceId, 10),
-    getSatisfactionScores(workspaceId, { from, to }),
-  ]);
+  let overview = {
+    totalConversations: 0,
+    totalMessages: 0,
+    totalLeads: 0,
+    avgResponseMs: 0,
+    conversationsTrend: 0,
+    messagesTrend: 0,
+    leadsTrend: 0,
+  };
+  let topQuestions: Array<{ question: string; count: number }> = [];
+  let satisfaction = { up: 0, down: 0, total: 0, score: 0 };
+
+  try {
+    const session = await requireSession();
+    const workspaceId = session.workspaceId!;
+
+    const [ov, tq, sat] = await Promise.all([
+      getAnalyticsOverview(workspaceId, { from, to }),
+      getTopQuestions(workspaceId, 10),
+      getSatisfactionScores(workspaceId, { from, to }),
+    ]);
+    overview = ov;
+    topQuestions = tq;
+    satisfaction = sat;
+  } catch (err) {
+    console.error("AnalyticsPage data fetch error:", err);
+    // Render with zeroed defaults — the page still shows correctly with empty data
+  }
 
   return (
     <div className="space-y-6">
