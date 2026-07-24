@@ -3,80 +3,80 @@
 @tailwind utilities;
 
 /**
- * DESIGN SYSTEM TOKENS — MONOCHROMATIC (BLACK & WHITE)
+ * DESIGN SYSTEM TOKENS — DEEP BLACK & VIBRANT BLUE
  * -------------------
  * All colors are HSL channel triplets.
- * This theme uses a high-contrast black and white aesthetic.
+ * This theme uses a high-contrast black and blue aesthetic.
  */
 
 @layer base {
   :root {
-    /* Surfaces — Clean White */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --card: 0 0% 100%;
+    /* Surfaces — Vibrant Blue */
+    --background: 221 83% 53%; /* Professional Blue */
+    --foreground: 0 0% 0%;      /* Pure Black */
+    --card: 221 83% 53%;
     --card-foreground: 0 0% 0%;
-    --popover: 0 0% 100%;
+    --popover: 221 83% 53%;
     --popover-foreground: 0 0% 0%;
 
-    /* Brand — Monochromatic */
+    /* Brand — Monochromatic Black */
     --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --primary-foreground: 221 83% 90%;
+    --secondary: 221 83% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 221 83% 45%;
+    --muted-foreground: 0 0% 0% / 0.6;
+    --accent: 221 83% 40%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Semantics — Muted grayscale for aesthetic consistency */
-    --destructive: 0 0% 30%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 0 0% 20%;
-    --success-foreground: 0 0% 100%;
-    --warning: 0 0% 40%;
-    --warning-foreground: 0 0% 100%;
+    /* Semantics — Grayscale for aesthetic consistency */
+    --destructive: 0 0% 20%;
+    --destructive-foreground: 221 83% 53%;
+    --success: 0 0% 10%;
+    --success-foreground: 221 83% 53%;
+    --warning: 0 0% 30%;
+    --warning-foreground: 221 83% 53%;
 
     /* Lines + rings */
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
+    --border: 0 0% 0% / 0.2;
+    --input: 0 0% 0% / 0.2;
     --ring: 0 0% 0%;
 
     /* Geometry */
-    --radius: 0rem; /* Sharp edges for a modern B&W aesthetic */
+    --radius: 0.25rem; 
   }
 
   .dark {
-    /* Surfaces — Deep Black */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    /* Surfaces — Absolute Deep Black */
+    --background: 0 0% 0%;      /* Pure Black */
+    --foreground: 221 83% 53%;  /* Vibrant Blue */
     --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
+    --card-foreground: 221 83% 53%;
     --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
+    --popover-foreground: 221 83% 53%;
 
-    /* Brand — Monochromatic */
-    --primary: 0 0% 100%;
+    /* Brand — Blue highlights */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 221 83% 53%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 221 83% 53% / 0.6;
+    --accent: 0 0% 15%;
+    --accent-foreground: 221 83% 53%;
 
     /* Semantics */
-    --destructive: 0 0% 70%;
-    --destructive-foreground: 0 0% 0%;
-    --success: 0 0% 80%;
-    --success-foreground: 0 0% 0%;
-    --warning: 0 0% 60%;
-    --warning-foreground: 0 0% 0%;
+    --destructive: 0 0% 20%;
+    --destructive-foreground: 221 83% 53%;
+    --success: 0 0% 30%;
+    --success-foreground: 221 83% 53%;
+    --warning: 0 0% 25%;
+    --warning-foreground: 221 83% 53%;
 
     /* Lines + rings */
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 100%;
+    --border: 221 83% 53% / 0.2;
+    --input: 221 83% 53% / 0.2;
+    --ring: 221 83% 53%;
   }
 }
 
@@ -99,16 +99,16 @@
 
   /* Typography Refinement */
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tighter font-bold uppercase;
+    @apply tracking-tight font-bold uppercase;
   }
 
-  /* Selection uses a refined primary tint */
+  /* Selection uses a blue/black mix */
   ::selection {
-    background-color: hsl(var(--foreground) / 0.15);
+    background-color: hsl(var(--primary) / 0.3);
     color: hsl(var(--foreground));
   }
 
-  /* Custom Scrollbar — Discrete & Professional */
+  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -117,14 +117,14 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-foreground/20 rounded-none hover:bg-foreground/40 transition-colors;
+    @apply bg-primary/40 rounded-full hover:bg-primary/60 transition-colors;
   }
 }
 
 @layer components {
-  /* Premium Glass Effects — Monochromatic */
+  /* Glass Effects — Black & Blue */
   .glass {
-    @apply bg-background/60 backdrop-blur-md border border-foreground/10;
+    @apply bg-background/60 backdrop-blur-md border border-primary/20;
   }
 
   /* Multi-layered Premium Shadows */
@@ -133,7 +133,7 @@
   }
 
   .dark .shadow-premium {
-    box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 2px 4px rgba(0,0,0,.2), 0 12px 24px rgba(0,0,0,.2);
+    box-shadow: 0 0 40px -10px rgba(0,102,255,0.1);
   }
 
   .skeleton {
