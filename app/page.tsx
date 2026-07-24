@@ -20,6 +20,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { motion } from "framer-motion";
 import {
   Bot,
