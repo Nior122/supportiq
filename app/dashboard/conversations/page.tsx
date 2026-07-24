@@ -78,7 +78,7 @@ export default async function ConversationsPage() {
             </div>
             <h3 className="mt-6 text-[15px] font-bold">No conversations yet</h3>
             <p className="mt-2 max-w-sm text-[14px] text-muted-foreground">
-              They'll appear here automatically as soon as users start interacting with your bots.
+              They&apos;ll appear here automatically as soon as users start interacting with your bots.
             </p>
           </CardContent>
         </Card>
@@ -156,6 +156,12 @@ export default async function ConversationsPage() {
               })}
             </div>
           </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
         </Card>
       )}
     </div>

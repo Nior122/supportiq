@@ -24,7 +24,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -33,11 +33,9 @@ import {
   Bot,
   MessageSquare,
   BarChart3,
-  Users,
   Zap,
   Shield,
   Globe,
-  FileText,
   Check,
   ChevronDown,
   ArrowRight,

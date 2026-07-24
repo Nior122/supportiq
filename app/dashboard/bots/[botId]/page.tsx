@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, FileText, Clock, BarChart3, ArrowRight, Palette, FlaskConical } from "lucide-react";
+import { MessageSquare, FileText, Clock, BarChart3, ArrowRight, Palette, FlaskConical, Bot } from "lucide-react";
 
 const statusConfig: Record<string, { label: string; variant: "success" | "warning" | "secondary" }> = {
   ACTIVE: { label: "Active", variant: "success" },

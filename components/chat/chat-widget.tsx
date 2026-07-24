@@ -147,7 +147,7 @@ export function ChatWidget({
         // carry, and commit all text that isn't part of an in-progress sentinel.
         // Returns the committed text; leaves any trailing partial sentinel (or
         // leftover bytes) in `pending`.
-        const commitSafeText = (id: string): string => {
+        const commitSafeText = (_id: string): string => {
           let committed = "";
           SENTINEL.lastIndex = 0;
           // Walk through `pending`, consuming full sentinels and keeping any text

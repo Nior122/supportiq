@@ -25,8 +25,6 @@ import {
   BarChart3,
   Plus,
   ArrowRight,
-  FileText,
-  Zap,
 } from "lucide-react";
 
 async function getDashboardData(workspaceId: string) {

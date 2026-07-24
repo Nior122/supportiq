@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SettingsForm } from "./settings-form";
-import { Key, Webhook, AlertTriangle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 async function getWorkspace(workspaceId: string) {
   return prisma.workspace.findUnique({

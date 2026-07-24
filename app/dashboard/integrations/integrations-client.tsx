@@ -68,7 +68,7 @@ export function IntegrationsClient({
   webhooks,
 }: IntegrationsClientProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   // Dialog states
   const [showKeyDialog, setShowKeyDialog] = useState(false);
