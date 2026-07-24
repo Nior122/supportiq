@@ -28,6 +28,7 @@ import { Card } from "@/components/ui/card";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
+import { SplineSceneBasic } from "@/components/marketing/spline-demo";
 import { motion } from "framer-motion";
 import {
   Bot,
@@ -187,35 +188,19 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            {/* Product Mockup / Visual */}
+            {/* Spline Scene Integration */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative mx-auto mt-20 max-w-5xl"
             >
-              <div className="relative rounded-2xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-sm">
-                <div className="overflow-hidden rounded-xl border border-border/50 bg-muted/20 shadow-inner">
-                  {/* Mock dashboard window */}
-                  <div className="flex h-10 items-center gap-2 border-b border-border/50 bg-muted/40 px-4">
-                    <div className="flex gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-full bg-border" />
-                      <div className="h-2.5 w-2.5 rounded-full bg-border" />
-                      <div className="h-2.5 w-2.5 rounded-full bg-border" />
-                    </div>
-                    <div className="mx-auto h-5 w-48 rounded-md bg-border/20" />
-                  </div>
-                  <div className="aspect-[16/10] bg-gradient-to-br from-background to-muted/20" />
-                </div>
-              </div>
-              {/* Floating accents */}
-              <div className="absolute -left-12 top-1/2 -z-10 h-64 w-64 animate-pulse rounded-full bg-primary/10 blur-[80px]" />
-              <div className="absolute -right-12 bottom-0 -z-10 h-64 w-64 animate-pulse rounded-full bg-accent/10 blur-[80px]" />
+              <SplineSceneBasic />
             </motion.div>
           </div>
         </section>
 
-        {/* ─── Features (Bento Grid) ─── */}
+        {/* ─── Features (Grid) ─── */}
         <section id="features" className="container px-6 py-24 lg:py-32">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">Built for precision</h2>
@@ -224,7 +209,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="mt-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, i) => (
               <motion.div
                 key={feature.title}
@@ -232,13 +217,13 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.05 }}
                 viewport={{ once: true }}
-                className={`${feature.size === "large" ? "lg:col-span-3" : "lg:col-span-2"} group relative rounded-2xl border border-border/50 bg-background p-8 shadow-sm transition-all hover:shadow-md`}
+                className="group relative flex flex-col rounded-2xl border border-border/50 bg-background p-8 shadow-sm transition-all hover:shadow-md"
               >
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
                   <feature.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-bold">{feature.title}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                <p className="mt-2 flex-1 text-[15px] leading-relaxed text-muted-foreground">
                   {feature.description}
                 </p>
               </motion.div>
