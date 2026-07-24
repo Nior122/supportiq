@@ -14,11 +14,12 @@
  */
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SettingsForm } from "./settings-form";
 import { cn } from "@/lib/utils";
+
 
 async function getWorkspace(workspaceId: string) {
   return prisma.workspace.findUnique({
