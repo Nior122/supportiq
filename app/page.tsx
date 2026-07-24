@@ -133,23 +133,23 @@ function FAQItem({ item }: { item: { q: string; a: string } }) {
 
 export default function LandingPage() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-black selection:bg-primary/10 selection:text-primary">
+    <div className="relative flex min-h-screen flex-col bg-black selection:bg-primary/10 selection:text-primary overflow-x-hidden">
       <JsonLd type="landing" />
       
-      {/* ─── Immersive Background ─── */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+      {/* ─── Fixed Immersive Background ─── */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
         <SplineScene 
           scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-          className="w-full h-full opacity-60"
+          className="w-full h-full"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/80 pointer-events-none" />
         <Spotlight
           className="-top-40 left-0 md:left-60 md:-top-20"
           size={600}
         />
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col min-h-screen pointer-events-none">
         <SiteHeader />
 
         <main className="flex-1">
@@ -162,7 +162,7 @@ export default function LandingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary pointer-events-auto">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
@@ -185,7 +185,7 @@ export default function LandingPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+                  className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row pointer-events-auto"
                 >
                   <Button size="lg" className="h-12 rounded-full px-8 font-semibold shadow-premium" asChild>
                     <Link href="/sign-up">Start for free</Link>
@@ -202,14 +202,14 @@ export default function LandingPage() {
 
           {/* ─── Features (Grid) ─── */}
           <section id="features" className="container px-6 py-24 lg:py-32">
-            <div className="mx-auto max-w-3xl text-center">
+            <div className="mx-auto max-w-3xl text-center mb-20">
               <h2 className="text-3xl font-bold tracking-tight sm:text-5xl text-white">Built for precision</h2>
               <p className="mt-4 text-lg text-neutral-400">
                 A complete toolkit to build, train, and deploy AI assistants that actually understand your business.
               </p>
             </div>
 
-            <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pointer-events-auto">
               {features.map((feature, i) => (
                 <motion.div
                   key={feature.title}
@@ -232,7 +232,7 @@ export default function LandingPage() {
           </section>
 
           {/* ─── Steps ─── */}
-          <section className="bg-white/5 backdrop-blur-sm py-24 lg:py-32">
+          <section className="py-24 lg:py-32">
             <div className="container px-6">
               <div className="flex flex-col items-center justify-between gap-12 lg:flex-row">
                 <div className="max-w-[480px]">
@@ -258,7 +258,7 @@ export default function LandingPage() {
                     ))}
                   </div>
                 </div>
-                <div className="relative aspect-square w-full max-w-[500px] rounded-3xl border border-white/10 bg-white/5 shadow-elevated overflow-hidden backdrop-blur-md">
+                <div className="relative aspect-square w-full max-w-[500px] rounded-3xl border border-white/10 bg-white/5 shadow-elevated overflow-hidden backdrop-blur-sm pointer-events-auto">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
                   {/* Abstract visual placeholder */}
                   <div className="flex h-full items-center justify-center text-white/10">
@@ -271,18 +271,18 @@ export default function LandingPage() {
 
           {/* ─── Pricing ─── */}
           <section id="pricing" className="container px-6 py-24 lg:py-32">
-            <div className="mx-auto max-w-3xl text-center">
+            <div className="mx-auto max-w-3xl text-center mb-20">
               <h2 className="text-3xl font-bold tracking-tight sm:text-5xl text-white">Simple pricing</h2>
               <p className="mt-4 text-lg text-neutral-400">
                 Everything you need to automate support. Scale as you grow.
               </p>
             </div>
 
-            <div className="mt-20 grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-3 pointer-events-auto">
               {pricingTiers.map((tier) => (
                 <Card
                   key={tier.name}
-                  className={`flex flex-col rounded-3xl p-8 backdrop-blur-md transition-transform hover:scale-[1.02] bg-white/5 border-white/10 ${
+                  className={`flex flex-col rounded-3xl p-8 backdrop-blur-sm transition-transform hover:scale-[1.02] bg-white/5 border-white/10 ${
                     tier.highlighted ? "border-primary ring-1 ring-primary/20" : ""
                   }`}
                 >
@@ -319,8 +319,8 @@ export default function LandingPage() {
           </section>
 
           {/* ─── FAQ ─── */}
-          <section id="faq" className="bg-white/5 backdrop-blur-sm py-24 lg:py-32">
-            <div className="container max-w-4xl px-6">
+          <section id="faq" className="py-24 lg:py-32">
+            <div className="container max-w-4xl px-6 pointer-events-auto">
               <h2 className="text-center text-3xl font-bold tracking-tight sm:text-4xl text-white">Common questions</h2>
               <div className="mt-12 space-y-1">
                 {[
@@ -335,7 +335,9 @@ export default function LandingPage() {
           </section>
         </main>
 
-        <SiteFooter />
+        <div className="pointer-events-auto">
+          <SiteFooter />
+        </div>
       </div>
     </div>
   );
