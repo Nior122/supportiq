@@ -3,77 +3,66 @@
 @tailwind utilities;
 
 /**
- * DESIGN SYSTEM TOKENS — DEEP BLACK & VIBRANT BLUE
+ * DESIGN SYSTEM TOKENS — ABSOLUTE DARK (BLACK & BLUE)
  * -------------------
- * All colors are HSL channel triplets.
- * This theme uses a high-contrast black and blue aesthetic.
+ * High-contrast professional theme with absolute black backgrounds 
+ * and vibrant blue foregrounds.
  */
 
 @layer base {
   :root {
-    /* Surfaces — Vibrant Blue */
-    --background: 221 83% 53%; /* Professional Blue */
-    --foreground: 0 0% 0%;      /* Pure Black */
-    --card: 221 83% 53%;
-    --card-foreground: 0 0% 0%;
-    --popover: 221 83% 53%;
-    --popover-foreground: 0 0% 0%;
-
-    /* Brand — Monochromatic Black */
-    --primary: 0 0% 0%;
-    --primary-foreground: 221 83% 90%;
-    --secondary: 221 83% 45%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 221 83% 45%;
-    --muted-foreground: 0 0% 0% / 0.6;
-    --accent: 221 83% 40%;
-    --accent-foreground: 0 0% 100%;
-
-    /* Semantics — Grayscale for aesthetic consistency */
-    --destructive: 0 0% 20%;
-    --destructive-foreground: 221 83% 53%;
-    --success: 0 0% 10%;
-    --success-foreground: 221 83% 53%;
-    --warning: 0 0% 30%;
-    --warning-foreground: 221 83% 53%;
-
-    /* Lines + rings */
-    --border: 0 0% 0% / 0.2;
-    --input: 0 0% 0% / 0.2;
-    --ring: 0 0% 0%;
-
-    /* Geometry */
-    --radius: 0.25rem; 
-  }
-
-  .dark {
-    /* Surfaces — Absolute Deep Black */
-    --background: 0 0% 0%;      /* Pure Black */
-    --foreground: 221 83% 53%;  /* Vibrant Blue */
+    /* Absolute Dark Mode as Default */
+    --background: 0 0% 0%;      /* Absolute Black #000000 */
+    --foreground: 221 83% 53%;  /* Vibrant Blue #2172E5 */
     --card: 0 0% 0%;
     --card-foreground: 221 83% 53%;
     --popover: 0 0% 0%;
     --popover-foreground: 221 83% 53%;
 
-    /* Brand — Blue highlights */
+    /* Brand */
     --primary: 221 83% 53%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 10%;
+    --secondary: 0 0% 8%;
     --secondary-foreground: 221 83% 53%;
-    --muted: 0 0% 10%;
+    --muted: 0 0% 8%;
     --muted-foreground: 221 83% 53% / 0.6;
-    --accent: 0 0% 15%;
+    --accent: 0 0% 12%;
     --accent-foreground: 221 83% 53%;
 
-    /* Semantics */
-    --destructive: 0 0% 20%;
-    --destructive-foreground: 221 83% 53%;
-    --success: 0 0% 30%;
-    --success-foreground: 221 83% 53%;
-    --warning: 0 0% 25%;
-    --warning-foreground: 221 83% 53%;
+    /* Semantics - Muted to keep focus on Blue/Black */
+    --destructive: 0 100% 50%; /* Red for errors */
+    --destructive-foreground: 0 0% 0%;
+    --success: 142 70% 50%;
+    --success-foreground: 0 0% 0%;
+    --warning: 48 96% 50%;
+    --warning-foreground: 0 0% 0%;
 
     /* Lines + rings */
+    --border: 221 83% 53% / 0.2;
+    --input: 221 83% 53% / 0.2;
+    --ring: 221 83% 53%;
+
+    --radius: 0rem; 
+  }
+
+  /* Force dark mode variables even if 'dark' class is missing */
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 221 83% 53%;
+    --card: 0 0% 0%;
+    --card-foreground: 221 83% 53%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 221 83% 53%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 221 83% 53%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 221 83% 53% / 0.6;
+    --accent: 0 0% 12%;
+    --accent-foreground: 221 83% 53%;
+
     --border: 221 83% 53% / 0.2;
     --input: 221 83% 53% / 0.2;
     --ring: 221 83% 53%;
@@ -90,54 +79,46 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    background-color: black;
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary;
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
   }
 
-  /* Typography Refinement */
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight font-bold uppercase;
   }
 
-  /* Selection uses a blue/black mix */
   ::selection {
     background-color: hsl(var(--primary) / 0.3);
-    color: hsl(var(--foreground));
+    color: hsl(var(--primary));
   }
 
-  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: black;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/40 rounded-full hover:bg-primary/60 transition-colors;
+    @apply bg-primary/40 rounded-none hover:bg-primary/60 transition-colors;
   }
 }
 
 @layer components {
-  /* Glass Effects — Black & Blue */
   .glass {
-    @apply bg-background/60 backdrop-blur-md border border-primary/20;
+    @apply bg-black/60 backdrop-blur-md border border-primary/20;
   }
 
-  /* Multi-layered Premium Shadows */
   .shadow-premium {
-    box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05);
-  }
-
-  .dark .shadow-premium {
-    box-shadow: 0 0 40px -10px rgba(0,102,255,0.1);
+    box-shadow: 0 0 50px -10px rgba(33, 114, 229, 0.2);
   }
 
   .skeleton {
-    @apply relative overflow-hidden bg-muted;
+    @apply relative overflow-hidden bg-zinc-900;
   }
   .skeleton::after {
     @apply absolute inset-0 -translate-x-full;
@@ -145,14 +126,14 @@
     background: linear-gradient(
       90deg,
       transparent,
-      hsl(var(--foreground) / 0.05),
+      hsl(var(--primary) / 0.1),
       transparent
     );
     animation: shimmer 2s infinite;
   }
 
   .card-surface {
-    @apply border border-border bg-card text-card-foreground shadow-none;
+    @apply border border-border bg-black text-foreground shadow-none;
   }
 }
 
@@ -165,25 +146,20 @@
     display: none;
   }
 
-  .mask-fade-r {
-    -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
-    mask-image: linear-gradient(to right, black 80%, transparent 100%);
-  }
-
   .prose-chat {
     @apply text-[0.95rem] leading-relaxed;
   }
   .prose-chat pre {
-    @apply my-3 overflow-x-auto border border-border bg-muted/50 p-3 text-sm;
+    @apply my-3 overflow-x-auto border border-border bg-zinc-900 p-3 text-sm;
   }
   .prose-chat code {
-    @apply bg-muted px-1.5 py-0.5 text-[0.85em] font-medium;
+    @apply bg-zinc-900 px-1.5 py-0.5 text-[0.85em] font-medium;
   }
   .prose-chat pre code {
     @apply bg-transparent p-0;
   }
   .prose-chat a {
-    @apply font-bold text-foreground underline underline-offset-4 hover:opacity-70;
+    @apply font-bold text-primary underline underline-offset-4 hover:opacity-80;
   }
   .prose-chat ul {
     @apply my-2 list-disc space-y-1 pl-6;
@@ -192,6 +168,6 @@
     @apply my-2 list-decimal space-y-1 pl-6;
   }
   .prose-chat blockquote {
-    @apply border-l-4 border-foreground/20 pl-3 italic text-muted-foreground;
+    @apply border-l-4 border-primary/20 pl-3 italic text-zinc-400;
   }
 }

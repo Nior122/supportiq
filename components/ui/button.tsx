@@ -33,7 +33,7 @@ export const buttonVariants = cva(
           "bg-destructive text-destructive-foreground shadow-soft hover:bg-destructive/90 active:scale-[0.98]",
         link: "text-primary underline-offset-4 hover:underline",
         gradient:
-          "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow hover:from-brand-600 hover:to-brand-700 active:scale-[0.98]",
+          "bg-gradient-to-r from-brand-500 to-brand-600 text-black shadow-glow hover:from-brand-600 hover:to-brand-700 active:scale-[0.98]",
       },
       size: {
         sm: "h-8 px-3 text-xs",
