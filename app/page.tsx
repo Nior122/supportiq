@@ -323,7 +323,7 @@ export default function LandingPage() {
                   className={`mt-8 h-11 w-full rounded-xl font-semibold ${
                     tier.highlighted ? "shadow-premium" : "bg-muted text-foreground hover:bg-muted/80"
                   }`}
-                  variant={tier.highlighted ? "default" : "secondary"}
+                  variant={tier.highlighted ? "primary" : "secondary"}
                   asChild
                 >
                   <Link href="/sign-up">{tier.cta}</Link>

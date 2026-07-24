@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { Bot, Thermometer, Cpu, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BotData {
   id: string;

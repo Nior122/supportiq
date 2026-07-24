@@ -24,6 +24,7 @@ import {
   ThumbsDown,
   Clock,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const statusConfig: Record<string, { label: string; variant: "success" | "warning" | "secondary" | "outline" }> = {
   OPEN: { label: "Open", variant: "success" },

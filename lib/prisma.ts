@@ -67,6 +67,7 @@ const customTypeParsers = {
     // Fall back to pg-types defaults for all other types.
     // Cast to satisfy pg-types' overloaded signature (it accepts number + format
     // union, but its TS types expose a narrower overload set than its runtime API).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (neonTypes.getTypeParser as (oid: number, format: string) => any)(
       oid,
       format,
@@ -85,17 +86,13 @@ const globalForPrisma = globalThis as unknown as {
  * instead of the defaults that break Prisma's WASM engine.
  */
 function createNeonHttpClient(connectionString: string) {
-  const baseNeon = neon(connectionString) as (
-    sql: string,
-    values?: any[],
-    options?: Record<string, any>,
-  ) => any;
+  const baseNeon = neon(connectionString);
   const client = (
     sql: string,
     values: any[],
     options: Record<string, any> = {},
   ) => {
-    return baseNeon(sql, values, {
+    return (baseNeon as any)(sql, values, {
       ...options,
       types: customTypeParsers,
     });
@@ -107,6 +104,7 @@ function createNeonHttpClient(connectionString: string) {
 
 function createPrismaClient(): PrismaClient {
   const sql = createNeonHttpClient(process.env.DATABASE_URL!);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const adapter = new PrismaNeonHTTP(sql as any);
   return new PrismaClient({
     adapter,
