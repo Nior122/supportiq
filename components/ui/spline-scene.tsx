@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useMemo } from 'react'
 const Spline = lazy(() => import('@splinetool/react-spline'))
 
 interface SplineSceneProps {
@@ -8,19 +8,24 @@ interface SplineSceneProps {
   className?: string
 }
 
-export function SplineScene({ scene, className }: SplineSceneProps) {
+export const SplineScene = React.memo(function SplineScene({ scene, className }: SplineSceneProps) {
+  const splineElement = useMemo(() => (
+    <Spline
+      scene={scene}
+      className={className}
+    />
+  ), [scene, className])
+
   return (
     <Suspense 
       fallback={
         <div className="w-full h-full flex items-center justify-center">
-          <span className="loader"></span>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
         </div>
       }
     >
-      <Spline
-        scene={scene}
-        className={className}
-      />
+      {splineElement}
     </Suspense>
   )
-}
+})
+

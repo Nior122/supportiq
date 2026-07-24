@@ -1,30 +1,35 @@
 'use client'
 
-import { SplineScene } from "./spline-scene"
-import { Spotlight } from "./spotlight"
+import { usePathname } from "next/navigation"
+import { GlobalBackgroundEffects } from "./global-background-effects"
+import { HomeSplineBackground } from "./home-spline-background"
+import { useEffect, useState } from "react"
 
+/**
+ * Orchestrator for site-wide background logic.
+ * Decides when to load the heavy Spline robot vs. lightweight effects.
+ */
 export function GlobalSplineBackground() {
-  return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-black pointer-events-auto">
-      {/* 1. Spline Scene Layer (Interactive) */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-full h-full max-w-[1440px] max-h-[90vh]">
-          <SplineScene 
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="w-full h-full"
-          />
-        </div>
-      </div>
+  const pathname = usePathname()
+  const isHomePage = pathname === "/"
+  
+  // Performance: Don't even evaluate the Spline import logic until we are on the homepage
+  // and we've confirmed the environment is client-side.
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-      {/* 2. Spotlight Layer (Visual effect on top of Spline) */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        <Spotlight
-          className="-top-40 left-0 md:left-60 md:-top-20"
-          size={600}
-        />
-        {/* Subtle gradient to ensure content legibility while keeping robot visible */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
-      </div>
-    </div>
+  if (!mounted) return <div className="fixed inset-0 bg-black -z-10" />
+
+  return (
+    <>
+      {/* 1. Global Lightweight Layer (Always mounted) */}
+      <GlobalBackgroundEffects />
+
+      {/* 2. Page-Specific Heavy Layer (Homepage only) */}
+      {isHomePage && <HomeSplineBackground />}
+    </>
   )
 }
