@@ -10,21 +10,10 @@
  *    so they're inlined as CSS variables, not external HTTP fetches.
  */
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { Providers } from "@/components/providers/providers";
 import "./globals.css";
-
-const GeistSans = localFont({
-  src: "../node_modules/geist/dist/fonts/geist-sans/Geist-Regular.woff2",
-  variable: "--font-geist-sans",
-  display: "swap",
-});
-
-const GeistMono = localFont({
-  src: "../node_modules/geist/dist/fonts/geist-mono/GeistMono-Regular.woff2",
-  variable: "--font-geist-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {

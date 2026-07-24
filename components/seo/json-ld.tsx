@@ -6,14 +6,14 @@
  * engines use to generate rich results. This improves how SupportIQ appears
  * in Google search results — showing ratings, pricing, and FAQ snippets.
  */
-import { env } from "@/lib/env";
+import { publicEnv } from "@/lib/env-client";
 
 interface JsonLdProps {
   type: "landing" | "pricing" | "faq";
 }
 
 export function JsonLd({ type }: JsonLdProps) {
-  const APP_URL = env.NEXT_PUBLIC_APP_URL;
+  const APP_URL = publicEnv.APP_URL;
 
   const softwareApplication = {
     "@context": "https://schema.org",

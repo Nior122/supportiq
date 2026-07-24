@@ -40,7 +40,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Reverse-gate: signed-in users visiting auth-only routes are bounced to the app,
   // which is the friendly behavior (no "you're already signed in" dead-end pages).
   if (isAuthRoute(req)) {
-    const authObj = await auth();
+    const authObj = await auth;
     if (authObj.userId) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";
