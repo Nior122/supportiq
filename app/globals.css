@@ -3,87 +3,80 @@
 @tailwind utilities;
 
 /**
- * DESIGN SYSTEM TOKENS
+ * DESIGN SYSTEM TOKENS — MONOCHROMATIC (BLACK & WHITE)
  * -------------------
- * All colors are HSL channel triplets (e.g. "222 47% 11%") and are consumed through
- * `hsl(var(--token) / <alpha-value>)` in tailwind.config.ts. Keeping them channel-only
- * lets Tailwind apply opacity modifiers (bg-primary/50) which RGB/hex can't do.
- *
- * Two themes live here as `[data-theme]` + `.dark` selectors — `next-themes` toggles
- * the `.dark` class on <html>. The palette is tuned for premium SaaS feel:
- *   • indigo primary (brand) — energetic but trustworthy (Linear/Vercel-vibe)
- *   • high-contrast neutral surfaces with a warm-cool split between light/dark
- *   • green success, amber warning, red destructive for status semantics
+ * All colors are HSL channel triplets.
+ * This theme uses a high-contrast black and white aesthetic.
  */
 
 @layer base {
   :root {
-    /* Surfaces — Warm, sophisticated light mode */
+    /* Surfaces — Clean White */
     --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover-foreground: 0 0% 0%;
 
-    /* Brand — Professional Indigo */
-    --primary: 243 75% 59%; /* indigo-600 */
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
+    /* Brand — Monochromatic */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
 
-    /* Semantics */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --success: 142 71% 45%;
-    --success-foreground: 210 20% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 210 20% 98%;
+    /* Semantics — Muted grayscale for aesthetic consistency */
+    --destructive: 0 0% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 0 0% 20%;
+    --success-foreground: 0 0% 100%;
+    --warning: 0 0% 40%;
+    --warning-foreground: 0 0% 100%;
 
-    /* Lines + rings — Softer for premium feel */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 243 75% 59%;
+    /* Lines + rings */
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 0%;
 
     /* Geometry */
-    --radius: 0.5rem; /* 8px — sharper, more professional than 10px */
+    --radius: 0rem; /* Sharp edges for a modern B&W aesthetic */
   }
 
   .dark {
-    /* Surfaces — Deep, premium Dark Mode (Linear/Vercel inspired) */
-    --background: 224 71% 4%;
-    --foreground: 210 20% 98%;
-    --card: 224 71% 4%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 20% 98%;
+    /* Surfaces — Deep Black */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Brand */
-    --primary: 243 75% 65%;
-    --primary-foreground: 224 71% 4%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 12%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    /* Brand — Monochromatic */
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
 
     /* Semantics */
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --success: 142 71% 45%;
-    --success-foreground: 210 20% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 210 20% 98%;
+    --destructive: 0 0% 70%;
+    --destructive-foreground: 0 0% 0%;
+    --success: 0 0% 80%;
+    --success-foreground: 0 0% 0%;
+    --warning: 0 0% 60%;
+    --warning-foreground: 0 0% 0%;
 
     /* Lines + rings */
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 243 75% 65%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 100%;
   }
 }
 
@@ -106,49 +99,45 @@
 
   /* Typography Refinement */
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-medium;
+    @apply tracking-tighter font-bold uppercase;
   }
 
   /* Selection uses a refined primary tint */
   ::selection {
-    background-color: hsl(var(--primary) / 0.15);
-    color: hsl(var(--primary));
+    background-color: hsl(var(--foreground) / 0.15);
+    color: hsl(var(--foreground));
   }
 
   /* Custom Scrollbar — Discrete & Professional */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/10 rounded-full hover:bg-muted-foreground/20 transition-colors;
+    @apply bg-foreground/20 rounded-none hover:bg-foreground/40 transition-colors;
   }
 }
 
 @layer components {
-  /* Premium Glass Effects */
+  /* Premium Glass Effects — Monochromatic */
   .glass {
-    @apply bg-background/60 backdrop-blur-md border border-white/10 shadow-[0_0_1px_1px_rgba(255,255,255,0.05)_inset];
+    @apply bg-background/60 backdrop-blur-md border border-foreground/10;
   }
 
   /* Multi-layered Premium Shadows */
   .shadow-premium {
-    box-shadow: 0 0 0 1px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05);
   }
 
   .dark .shadow-premium {
-    box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 2px 4px rgba(0,0,0,.2), 0 12px 24px rgba(0,0,0,.2);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 2px 4px rgba(0,0,0,.2), 0 12px 24px rgba(0,0,0,.2);
   }
 
-  /**
-   * Skeleton shimmer — placeholder for loading states. The pseudo-element slides
-   * across via the `shimmer` keyframe defined in tailwind.config.ts.
-   */
   .skeleton {
-    @apply relative overflow-hidden rounded-md bg-muted;
+    @apply relative overflow-hidden bg-muted;
   }
   .skeleton::after {
     @apply absolute inset-0 -translate-x-full;
@@ -156,20 +145,18 @@
     background: linear-gradient(
       90deg,
       transparent,
-      hsl(var(--foreground) / 0.06),
+      hsl(var(--foreground) / 0.05),
       transparent
     );
-    animation: shimmer 1.5s infinite;
+    animation: shimmer 2s infinite;
   }
 
-  /** Card with the house "card" shadow — the workhorse surface token. */
   .card-surface {
-    @apply rounded-xl border border-border bg-card text-card-foreground shadow-card;
+    @apply border border-border bg-card text-card-foreground shadow-none;
   }
 }
 
 @layer utilities {
-  /** Hide scrollbar while keeping scroll behavior (used by horizontal tab rails). */
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -178,27 +165,25 @@
     display: none;
   }
 
-  /** Mask gradients for fade-out edges on overflowing content rails. */
   .mask-fade-r {
     -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
     mask-image: linear-gradient(to right, black 80%, transparent 100%);
   }
 
-  /** Constrain prose for markdown chat messages + docs. */
   .prose-chat {
     @apply text-[0.95rem] leading-relaxed;
   }
   .prose-chat pre {
-    @apply my-3 overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 text-sm;
+    @apply my-3 overflow-x-auto border border-border bg-muted/50 p-3 text-sm;
   }
   .prose-chat code {
-    @apply rounded bg-muted px-1.5 py-0.5 text-[0.85em] font-medium;
+    @apply bg-muted px-1.5 py-0.5 text-[0.85em] font-medium;
   }
   .prose-chat pre code {
     @apply bg-transparent p-0;
   }
   .prose-chat a {
-    @apply font-medium text-primary underline underline-offset-2 hover:text-primary/80;
+    @apply font-bold text-foreground underline underline-offset-4 hover:opacity-70;
   }
   .prose-chat ul {
     @apply my-2 list-disc space-y-1 pl-6;
@@ -207,6 +192,6 @@
     @apply my-2 list-decimal space-y-1 pl-6;
   }
   .prose-chat blockquote {
-    @apply border-l-2 border-primary/40 pl-3 italic text-muted-foreground;
+    @apply border-l-4 border-foreground/20 pl-3 italic text-muted-foreground;
   }
 }

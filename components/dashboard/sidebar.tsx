@@ -28,6 +28,7 @@ import {
   Puzzle,
   Home,
   FlaskConical,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface NavItem {
@@ -37,7 +38,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: Home },
+  { label: "Home", href: "/", icon: Home },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Bots", href: "/dashboard/bots", icon: Bot },
   { label: "Playground", href: "/dashboard/playground", icon: FlaskConical },
   { label: "Conversations", href: "/dashboard/conversations", icon: MessageSquare },

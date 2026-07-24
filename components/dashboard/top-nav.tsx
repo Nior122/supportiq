@@ -14,9 +14,10 @@
  */
 import { useOrganization } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { Moon, Sun, Menu } from "lucide-react";
+import { Moon, Sun, Menu, Home } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface TopNavProps {
   onToggleSidebar: () => void;
@@ -47,19 +48,30 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
         <Menu className="h-4 w-4" />
       </Button>
 
-      {/* Workspace name */}
-      <div className="flex items-center gap-2">
+      {/* Workspace name / Home Link */}
+      <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
         <div className="flex h-5 w-5 items-center justify-center rounded border border-border/50 bg-muted text-[10px] font-bold text-muted-foreground">
           {organization?.name?.[0] ?? "S"}
         </div>
         <span className="text-[13px] font-medium text-foreground/80">
           {organization?.name ?? "SupportIQ"}
         </span>
-      </div>
+      </Link>
 
       <div className="flex-1" />
 
       <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          asChild
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Link href="/">
+            <Home className="h-4 w-4" />
+          </Link>
+        </Button>
+
         {/* Theme toggle */}
         <Button
           variant="ghost"
