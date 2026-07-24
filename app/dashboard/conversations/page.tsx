@@ -161,9 +161,3 @@ export default async function ConversationsPage() {
     </div>
   );
 }
-
-        </Card>
-      )}
-    </div>
-  );
-}
