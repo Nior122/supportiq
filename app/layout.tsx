@@ -13,9 +13,6 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Providers } from "@/components/providers/providers";
-import { GlobalSplineBackground } from "@/components/ui/global-spline-background";
-import { SiteHeader } from "@/components/marketing/site-header";
-import { SiteFooter } from "@/components/marketing/site-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -56,28 +53,8 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-dvh bg-black font-sans antialiased overflow-x-hidden">
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          <GlobalSplineBackground />
-        </div>
-        
-        {/* Content Layer */}
-        <div className="relative z-10 flex flex-col min-h-dvh pointer-events-none">
-          <Providers>
-            <div className="pointer-events-auto">
-              <SiteHeader />
-            </div>
-            
-            <main className="flex-1">
-              {/* Note: Individual pages should use pointer-events-auto for interactive content */}
-              {children}
-            </main>
-            
-            <div className="pointer-events-auto">
-              <SiteFooter />
-            </div>
-          </Providers>
-        </div>
+      <body className="min-h-dvh bg-background font-sans antialiased">
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
