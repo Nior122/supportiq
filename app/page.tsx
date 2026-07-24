@@ -137,11 +137,13 @@ export default function LandingPage() {
       <JsonLd type="landing" />
       
       {/* ─── Fixed Immersive Background ─── */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <SplineScene 
-          scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-          className="w-full h-full"
-        />
+      <div className="fixed inset-0 -z-10 flex items-center justify-center overflow-hidden pt-14">
+        <div className="w-full h-full max-w-7xl max-h-[80vh]">
+          <SplineScene 
+            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+            className="w-full h-full"
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/80 pointer-events-none" />
         <Spotlight
           className="-top-40 left-0 md:left-60 md:-top-20"
@@ -149,10 +151,10 @@ export default function LandingPage() {
         />
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen pointer-events-none">
+      <div className="relative z-10 flex flex-col min-h-screen">
         <SiteHeader />
 
-        <main className="flex-1">
+        <main className="flex-1 pointer-events-none">
           {/* ─── Hero ─── */}
           <section className="relative pt-24 lg:pt-32">
             <div className="container relative px-6">
@@ -304,15 +306,17 @@ export default function LandingPage() {
                     ))}
                   </div>
 
-                  <Button
-                    className={`mt-8 h-11 w-full rounded-xl font-semibold ${
-                      tier.highlighted ? "shadow-premium" : "bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                    variant={tier.highlighted ? "primary" : "secondary"}
-                    asChild
-                  >
-                    <Link href="/sign-up">{tier.cta}</Link>
-                  </Button>
+                  <div className="pointer-events-auto">
+                    <Button
+                      className={`mt-8 h-11 w-full rounded-xl font-semibold ${
+                        tier.highlighted ? "shadow-premium" : "bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                      variant={tier.highlighted ? "primary" : "secondary"}
+                      asChild
+                    >
+                      <Link href="/sign-up">{tier.cta}</Link>
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>
