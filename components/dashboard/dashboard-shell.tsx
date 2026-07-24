@@ -48,7 +48,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Sidebar — fixed on mobile, static on desktop */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r bg-background
+          fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-border/40 bg-background
           transition-transform duration-200 ease-in-out
           lg:static lg:translate-x-0
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -56,11 +56,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         aria-label="Sidebar"
       >
         {/* Brand mark at top of sidebar */}
-        <div className="flex h-16 items-center gap-2 border-b px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600">
-            <span className="text-sm font-bold text-white">S</span>
+        <div className="flex h-14 items-center gap-2 px-6">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-primary shadow-sm">
+            <span className="text-[10px] font-bold text-primary-foreground text-white">S</span>
           </div>
-          <span className="text-base font-semibold tracking-tight">SupportIQ</span>
+          <span className="text-[14px] font-bold tracking-tight">SupportIQ</span>
         </div>
 
         <Sidebar />
@@ -69,8 +69,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopNav onToggleSidebar={toggleSidebar} />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {children}
+        <main id="main-content" className="flex-1 overflow-y-auto bg-muted/5 p-8">
+          <div className="mx-auto max-w-screen-xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>

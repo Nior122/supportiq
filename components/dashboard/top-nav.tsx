@@ -35,48 +35,53 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border/40 bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Mobile hamburger */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden"
+        className="h-8 w-8 lg:hidden"
         onClick={onToggleSidebar}
         aria-label="Toggle sidebar"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-4 w-4" />
       </Button>
 
       {/* Workspace name */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-foreground">
+        <div className="flex h-5 w-5 items-center justify-center rounded border border-border/50 bg-muted text-[10px] font-bold text-muted-foreground">
+          {organization?.name?.[0] ?? "S"}
+        </div>
+        <span className="text-[13px] font-medium text-foreground/80">
           {organization?.name ?? "SupportIQ"}
         </span>
       </div>
 
       <div className="flex-1" />
 
-      {/* Theme toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={cycleTheme}
-        aria-label="Toggle theme"
-        className="text-muted-foreground"
-      >
-        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      </Button>
+      <div className="flex items-center gap-3">
+        {/* Theme toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={cycleTheme}
+          aria-label="Toggle theme"
+          className="h-8 w-8 text-muted-foreground/60 hover:text-foreground"
+        >
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Button>
 
-      {/* User avatar */}
-      <UserButton
-        afterSignOutUrl="/"
-        appearance={{
-          elements: {
-            avatarBox: "h-8 w-8",
-          },
-        }}
-      />
+        {/* User avatar */}
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: "h-7 w-7 rounded-full ring-1 ring-border/50",
+            },
+          }}
+        />
+      </div>
     </header>
   );
 }

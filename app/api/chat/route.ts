@@ -162,30 +162,39 @@ export async function POST(request: NextRequest) {
       })),
       temperature: bot.temperature,
       systemPrompt: ragPrompt,
+      onFinish: async (event) => {
+        try {
+          await saveMessage(
+            bot.id,
+            bot.workspaceId,
+            { role: "assistant", content: event.text },
+            body.sessionId ?? null,
+            body.endUserToken ?? endUserKey,
+            event.usage,
+            retrievedChunks.map((c) => ({
+              content: c.content,
+              documentName: c.documentName,
+              heading: c.heading,
+              similarity: c.similarity,
+            })),
+          );
+        } catch (err) {
+          log.error("Failed to save assistant message", { error: String(err) });
+        }
+      },
     });
 
-    // Step 6: Create conversation + save messages (fire-and-forget)
-    // We do this in the background so the stream starts immediately
-    const conversationPromise = saveConversationAndMessages(
+    // Step 6: Save the user message (fire-and-forget)
+    const saveUserMsgPromise = saveMessage(
       bot.id,
       bot.workspaceId,
-      body.messages,
+      { role: "user", content: lastUserMessage.content },
       body.sessionId ?? null,
-      // endUserToken column is NOT NULL — never pass null. Fall back to the same
-      // per-visitor key the rate limiter already derived so a no-token request still
-      // has a stable conversation grouping.
       body.endUserToken ?? endUserKey,
-      retrievedChunks.map((c) => ({
-        content: c.content,
-        documentName: c.documentName,
-        heading: c.heading,
-        similarity: c.similarity,
-      })),
     );
 
-    // Don't await conversationPromise — let it run in background
-    conversationPromise.catch((err) =>
-      log.error("Failed to save conversation", { error: String(err) }),
+    saveUserMsgPromise.catch((err) =>
+      log.error("Failed to save user message", { error: String(err) }),
     );
 
     // The AI SDK's `textStream` is a single-consumption async iterable that
@@ -222,6 +231,19 @@ export async function POST(request: NextRequest) {
         try {
           const { done, value } = await sdkBodyReader.read();
           if (done) {
+            // If the stream ends without any text tokens (e.g. AI returned empty),
+            // we MUST send the typing sentinel to clear the "researching" pill
+            // in the widget, otherwise it "hangs" in the researching state.
+            if (isFirstTextChunk) {
+              isFirstTextChunk = false;
+              controller.enqueue(encoder.encode("§STATUS:typing§"));
+              // Optional: provide a hardcoded fallback if the AI was completely silent
+              controller.enqueue(
+                encoder.encode(
+                  "I'm sorry, I don't have information about that in my knowledge base. Is there anything else I can help you with?",
+                ),
+              );
+            }
             controller.close();
             return;
           }
@@ -254,25 +276,22 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Save the conversation and messages to the database.
- * This runs after the stream starts so the user doesn't wait for DB writes.
+ * Find or create a conversation and save a single message to it.
  */
-async function saveConversationAndMessages(
+async function saveMessage(
   botId: string,
   workspaceId: string,
-  messages: Array<{ role: string; content: string }>,
+  message: { role: string; content: string },
   sessionId: string | null,
   endUserToken: string,
-  _citations?: Array<{
+  usage?: { promptTokens: number; completionTokens: number; totalTokens: number },
+  citations?: Array<{
     content: string;
     documentName: string;
     heading: string | null;
     similarity: number;
   }>,
 ) {
-  // Find or create conversation. Group by end-user (endUserToken) AND session so
-  // two anonymous widget visitors on the same bot don't get folded into one OPEN
-  // thread. sessionId alone isn't enough (it's often unset for widget traffic).
   let conversation = await prisma.conversation.findFirst({
     where: {
       botId,
@@ -296,23 +315,25 @@ async function saveConversationAndMessages(
     });
   }
 
-  // Save all messages
-  for (const msg of messages) {
-    await prisma.message.create({
-      data: {
-        conversationId: conversation.id,
-        role: msg.role.toUpperCase() as "USER" | "ASSISTANT",
-        content: msg.content,
-        totalTokens: 0, // Will be updated if we get token counts from the AI
-      },
-    });
-  }
+  // Save the single message
+  await prisma.message.create({
+    data: {
+      conversationId: conversation.id,
+      role: message.role.toUpperCase() as "USER" | "ASSISTANT",
+      content: message.content,
+      promptTokens: usage?.promptTokens ?? 0,
+      completionTokens: usage?.completionTokens ?? 0,
+      totalTokens: usage?.totalTokens ?? 0,
+      citations: citations ? JSON.parse(JSON.stringify(citations)) : undefined,
+    },
+  });
 
   // Update conversation stats
   await prisma.conversation.update({
     where: { id: conversation.id },
     data: {
-      messageCount: { increment: messages.length },
+      messageCount: { increment: 1 },
+      tokenUsage: { increment: usage?.totalTokens ?? 0 },
     },
   });
 }

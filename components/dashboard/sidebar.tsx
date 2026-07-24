@@ -56,14 +56,17 @@ function SidebarNavItem({ item, isActive }: { item: NavItem; isActive: boolean }
     <Link
       href={item.href}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-all",
         isActive
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
       )}
       aria-current={isActive ? "page" : undefined}
     >
-      <item.icon className="h-4 w-4 shrink-0" />
+      <item.icon className={cn(
+        "h-4 w-4 shrink-0 transition-colors",
+        isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+      )} />
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -79,29 +82,37 @@ export function Sidebar() {
 
   return (
     <nav
-      className="flex h-full flex-col gap-1 overflow-y-auto p-3"
+      className="flex h-full flex-col gap-6 overflow-y-auto px-4 py-6"
       aria-label="Main navigation"
     >
-      <div className="flex flex-col gap-1">
-        {navItems.map((item) => (
-          <SidebarNavItem
-            key={item.href}
-            item={item}
-            isActive={isActive(item.href)}
-          />
-        ))}
+      <div>
+        <div className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/50">
+          Main
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {navItems.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              isActive={isActive(item.href)}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="my-3 h-px bg-border" />
-
-      <div className="flex flex-col gap-1">
-        {secondaryNavItems.map((item) => (
-          <SidebarNavItem
-            key={item.href}
-            item={item}
-            isActive={isActive(item.href)}
-          />
-        ))}
+      <div>
+        <div className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/50">
+          Account
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {secondaryNavItems.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              isActive={isActive(item.href)}
+            />
+          ))}
+        </div>
       </div>
     </nav>
   );

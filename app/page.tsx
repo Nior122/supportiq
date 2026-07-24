@@ -20,26 +20,15 @@
  * The page includes semantic HTML landmarks (`<section>`, `<nav>`, `<article>`)
  * and descriptive headings for crawlability.
  */
+"use client";
+
 import Link from "next/link";
-import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
-
-export const metadata: Metadata = {
-  title: "SupportIQ — AI Customer Support That Actually Helps",
-  description:
-    "Create, train, and embed an AI-powered customer support assistant trained on your content. Supports PDFs, websites, and FAQs. Powered by OpenAI, Anthropic, and Groq.",
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: "SupportIQ — AI Customer Support That Actually Helps",
-    description:
-      "Create, train, and embed an AI-powered customer support assistant trained on your content.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "SupportIQ" }],
-  },
-};
+import { motion } from "framer-motion";
 import {
   Bot,
   MessageSquare,
@@ -51,6 +40,7 @@ import {
   FileText,
   Check,
   ChevronDown,
+  ArrowRight,
 } from "lucide-react";
 
 /* ──────────────────────────── Data ──────────────────────────── */
@@ -59,163 +49,82 @@ const features = [
   {
     icon: Bot,
     title: "AI-Powered Bots",
-    description:
-      "Create intelligent support bots that understand your business. Train on PDFs, websites, FAQs, and more.",
+    description: "Train intelligent bots on your PDFs, sites, and FAQs.",
+    size: "large",
   },
   {
     icon: MessageSquare,
-    title: "Natural Conversations",
-    description:
-      "Human-like chat with streaming responses, markdown formatting, and citation-backed answers.",
-  },
-  {
-    icon: FileText,
-    title: "Knowledge Base",
-    description:
-      "Upload documents, crawl websites, or write FAQs. Your bot automatically finds the right answer.",
+    title: "Natural Chat",
+    description: "Human-like streaming responses with citations.",
+    size: "small",
   },
   {
     icon: BarChart3,
-    title: "Analytics Dashboard",
-    description:
-      "Track conversations, response times, satisfaction scores, and top questions — all in real time.",
-  },
-  {
-    icon: Users,
-    title: "Lead Capture",
-    description:
-      "Automatically collect visitor info during conversations. Export leads to your CRM in one click.",
+    title: "Deep Analytics",
+    description: "Track performance and satisfaction in real time.",
+    size: "small",
   },
   {
     icon: Globe,
     title: "One-Line Embed",
-    description:
-      "Add SupportIQ to any website with a single `<script>` tag. Works with any platform or framework.",
+    description: "Add to any website with a single script tag.",
+    size: "large",
   },
   {
     icon: Shield,
-    title: "Enterprise Security",
-    description:
-      "SOC 2 ready. Your data is encrypted at rest and in transit. GDPR compliant out of the box.",
+    title: "Enterprise Grade",
+    description: "SOC 2 ready, GDPR compliant, and secure.",
+    size: "small",
   },
   {
     icon: Zap,
-    title: "Multi-Provider AI",
-    description:
-      "Choose between OpenAI, Anthropic, or Groq per bot. Mix and match for cost and quality.",
-  },
-];
-
-const steps = [
-  {
-    number: "1",
-    title: "Create a bot",
-    description: "Name it, choose a model, set its personality and language.",
-  },
-  {
-    number: "2",
-    title: "Add knowledge",
-    description: "Upload PDFs, add website URLs, or write FAQ entries.",
-  },
-  {
-    number: "3",
-    title: "Embed & go live",
-    description: "Copy one script tag, paste it on your site, and you're live.",
+    title: "Multi-Model",
+    description: "OpenAI, Anthropic, or Groq per bot.",
+    size: "small",
   },
 ];
 
 const pricingTiers = [
   {
-    name: "Free",
+    name: "Starter",
     price: "$0",
-    period: "forever",
-    description: "Perfect for trying out SupportIQ on a personal project.",
-    features: [
-      "1 bot",
-      "100 conversations / month",
-      "1 knowledge base document",
-      "Basic analytics",
-      "Community support",
-    ],
-    cta: "Get Started",
-    href: "/sign-up",
+    description: "Perfect for exploring SupportIQ.",
+    features: ["1 bot", "100 messages / mo", "Basic analytics"],
+    cta: "Start Free",
     highlighted: false,
   },
   {
     name: "Pro",
     price: "$49",
-    period: "/ month",
-    description: "For growing businesses that need more power and customization.",
-    features: [
-      "Unlimited bots",
-      "5,000 conversations / month",
-      "Unlimited documents & crawling",
-      "Advanced analytics & leads",
-      "Custom branding",
-      "Priority support",
-    ],
+    description: "For growing businesses.",
+    features: ["Unlimited bots", "5k messages / mo", "Custom branding", "Lead capture"],
     cta: "Start Free Trial",
-    href: "/sign-up",
     highlighted: true,
   },
   {
     name: "Enterprise",
     price: "Custom",
-    period: "",
-    description: "For teams that need SSO, SLA, dedicated support, and custom integrations.",
-    features: [
-      "Everything in Pro",
-      "Unlimited conversations",
-      "SSO / SAML",
-      "Dedicated support engineer",
-      "Custom AI model fine-tuning",
-      "SLA guarantee",
-    ],
+    description: "For high-volume teams.",
+    features: ["SSO / SAML", "Dedicated support", "SLA guarantee", "Fine-tuning"],
     cta: "Contact Sales",
-    href: "#",
     highlighted: false,
-  },
-];
-
-const faqItems = [
-  {
-    q: "How does the AI know about my business?",
-    a: "You upload documents (PDFs, text files), add website URLs to crawl, or write FAQ entries. SupportIQ creates vector embeddings of your content and uses RAG (Retrieval-Augmented Generation) to find the most relevant information when a visitor asks a question.",
-  },
-  {
-    q: "Which AI models do you support?",
-    a: "We support OpenAI (GPT-4o, GPT-4o-mini), Anthropic (Claude 3.5 Sonnet, Claude 3 Haiku), and Groq (Llama 3, Mixtral). You can choose a different model for each bot, and switch anytime.",
-  },
-  {
-    q: "Can I customize the chat widget?",
-    a: "Yes. You can change colors, the greeting message, quick replies, bot name, and avatar. The widget matches your brand — not ours.",
-  },
-  {
-    q: "Is my data secure?",
-    a: "Absolutely. All data is encrypted at rest (AES-256) and in transit (TLS 1.3). We're SOC 2 Type II compliant and GDPR ready. Your documents never leave your workspace.",
-  },
-  {
-    q: "Can I export conversations and leads?",
-    a: "Yes. You can export conversation history and lead data as CSV from the dashboard at any time. There's also a webhook integration for pushing leads to your CRM.",
-  },
-  {
-    q: "How accurate are the bot responses?",
-    a: "Our RAG pipeline retrieves the most relevant document chunks before generating an answer, and includes citations so you can verify accuracy. Most customers report 85-95% accuracy for common questions after initial training.",
   },
 ];
 
 /* ──────────────────────────── Components ──────────────────────────── */
 
-function FAQItem({ item }: { item: (typeof faqItems)[number] }) {
+function FAQItem({ item }: { item: { q: string; a: string } }) {
   return (
-    <details className="group border-b py-4">
-      <summary className="flex cursor-pointer items-center justify-between font-medium text-foreground">
+    <details className="group border-b border-border/50 py-4">
+      <summary className="flex cursor-pointer items-center justify-between text-[15px] font-medium transition-colors hover:text-primary">
         {item.q}
         <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
       </summary>
-      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        {item.a}
-      </p>
+      <div className="overflow-hidden transition-all group-open:animate-in group-open:fade-in group-open:slide-in-from-top-2">
+        <p className="pb-2 pt-3 text-[14px] leading-relaxed text-muted-foreground">
+          {item.a}
+        </p>
+      </div>
     </details>
   );
 }
@@ -224,216 +133,226 @@ function FAQItem({ item }: { item: (typeof faqItems)[number] }) {
 
 export default function LandingPage() {
   return (
-    <>
+    <div className="relative flex min-h-screen flex-col selection:bg-primary/10 selection:text-primary">
       <JsonLd type="landing" />
       <SiteHeader />
 
-      <main>
+      <main className="flex-1">
         {/* ─── Hero ─── */}
-        <section className="relative overflow-hidden">
-          {/* Gradient background */}
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_var(--primary),transparent)] opacity-[0.03]" />
+        <section className="relative overflow-hidden pt-24 lg:pt-32">
+          {/* Ambient background elements */}
+          <div className="absolute inset-0 -z-10 mx-auto max-w-7xl">
+            <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 bg-primary/5 opacity-50 blur-[120px]" />
+            <div className="absolute inset-0 bg-grid-pattern [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_100%)] opacity-[0.05]" />
+          </div>
 
-          <div className="mx-auto max-w-6xl px-4 pb-20 pt-24 text-center sm:px-6 sm:pt-32">
-            <div className="mx-auto max-w-3xl">
-              <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-                Customer support that{" "}
-                <span className="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
-                  actually helps
+          <div className="container relative px-6">
+            <div className="mx-auto max-w-[800px] text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+                  </span>
+                  Now powered by Llama 3.3
                 </span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-                Create an AI-powered support assistant trained on your business.
-                Reduce response time, capture leads, and make your customers happy — all
-                with one embeddable widget.
-              </p>
+                <h1 className="mt-8 text-5xl font-bold tracking-[-0.03em] sm:text-7xl lg:text-[84px] lg:leading-[1.1]">
+                  AI support that{" "}
+                  <span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    scales with you
+                  </span>
+                </h1>
+                <p className="mx-auto mt-8 max-w-[600px] text-lg leading-relaxed text-muted-foreground sm:text-xl">
+                  Train an AI assistant on your documents in minutes. Embed it anywhere, 
+                  capture leads, and automate your support workflow without losing the human touch.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+              >
+                <Button size="lg" className="h-12 rounded-full px-8 font-semibold shadow-premium" asChild>
+                  <Link href="/sign-up">Start for free</Link>
+                </Button>
+                <Button size="lg" variant="ghost" className="h-12 rounded-full px-8 font-semibold" asChild>
+                  <a href="#features" className="group">
+                    See Features <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </a>
+                </Button>
+              </motion.div>
             </div>
 
-            <div className="mt-8 flex items-center justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link href="/sign-up">Get Started Free</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <a href="#features">See Features</a>
-              </Button>
-            </div>
+            {/* Product Mockup / Visual */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative mx-auto mt-20 max-w-5xl"
+            >
+              <div className="relative rounded-2xl border border-border/50 bg-background/50 p-2 shadow-2xl backdrop-blur-sm">
+                <div className="overflow-hidden rounded-xl border border-border/50 bg-muted/20 shadow-inner">
+                  {/* Mock dashboard window */}
+                  <div className="flex h-10 items-center gap-2 border-b border-border/50 bg-muted/40 px-4">
+                    <div className="flex gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-border" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-border" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-border" />
+                    </div>
+                    <div className="mx-auto h-5 w-48 rounded-md bg-border/20" />
+                  </div>
+                  <div className="aspect-[16/10] bg-gradient-to-br from-background to-muted/20" />
+                </div>
+              </div>
+              {/* Floating accents */}
+              <div className="absolute -left-12 top-1/2 -z-10 h-64 w-64 animate-pulse rounded-full bg-primary/10 blur-[80px]" />
+              <div className="absolute -right-12 bottom-0 -z-10 h-64 w-64 animate-pulse rounded-full bg-accent/10 blur-[80px]" />
+            </motion.div>
+          </div>
+        </section>
 
-            {/* Social proof */}
-            <p className="mt-6 text-sm text-muted-foreground">
-              Free forever on the starter plan · No credit card required
+        {/* ─── Features (Bento Grid) ─── */}
+        <section id="features" className="container px-6 py-24 lg:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">Built for precision</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              A complete toolkit to build, train, and deploy AI assistants that actually understand your business.
             </p>
           </div>
-        </section>
 
-        {/* ─── Features ─── */}
-        <section id="features" className="border-t bg-muted/30 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Everything you need
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                From training to analytics, SupportIQ handles the full lifecycle of
-                AI-powered customer support.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <Card key={feature.title} className="border bg-background">
-                  <CardContent className="p-6">
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <feature.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h3 className="font-semibold">{feature.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="mt-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className={`${feature.size === "large" ? "lg:col-span-3" : "lg:col-span-2"} group relative rounded-2xl border border-border/50 bg-background p-8 shadow-sm transition-all hover:shadow-md`}
+              >
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                  <feature.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-bold">{feature.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </section>
 
-        {/* ─── How It Works ─── */}
-        <section className="py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Live in 3 steps
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                No complex setup. No training data wrangling. Just results.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-8 sm:grid-cols-3">
-              {steps.map((step) => (
-                <div key={step.number} className="text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                    {step.number}
-                  </div>
-                  <h3 className="mt-4 font-semibold">{step.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {step.description}
-                  </p>
+        {/* ─── Steps ─── */}
+        <section className="bg-muted/30 py-24 lg:py-32">
+          <div className="container px-6">
+            <div className="flex flex-col items-center justify-between gap-12 lg:flex-row">
+              <div className="max-w-[480px]">
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Go live in three simple steps.</h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                  Our RAG pipeline handles the heavy lifting. Just bring your content, we&apos;ll handle the intelligence.
+                </p>
+                <div className="mt-10 space-y-8">
+                  {[
+                    { title: "Connect your data", desc: "Upload PDFs or crawl your site." },
+                    { title: "Customize the bot", desc: "Set personality and choosing your model." },
+                    { title: "Embed the script", desc: "Copy-paste one line of code to your site." },
+                  ].map((step, i) => (
+                    <div key={i} className="flex gap-4">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                        {i + 1}
+                      </div>
+                      <div>
+                        <h4 className="font-bold">{step.title}</h4>
+                        <p className="text-sm text-muted-foreground">{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div className="relative aspect-square w-full max-w-[500px] rounded-3xl border border-border bg-background shadow-elevated overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                {/* Abstract visual placeholder */}
+                <div className="flex h-full items-center justify-center text-muted-foreground/20">
+                  <Bot size={120} strokeWidth={1} />
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* ─── Pricing ─── */}
-        <section id="pricing" className="border-t bg-muted/30 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Simple, transparent pricing
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                Start free. Scale when you&apos;re ready. No surprises.
-              </p>
-            </div>
+        <section id="pricing" className="container px-6 py-24 lg:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">Simple pricing</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Everything you need to automate support. Scale as you grow.
+            </p>
+          </div>
 
-            <div className="mt-14 grid gap-6 lg:grid-cols-3">
-              {pricingTiers.map((tier) => (
-                <Card
-                  key={tier.name}
-                  className={`relative flex flex-col ${
-                    tier.highlighted
-                      ? "border-primary shadow-lg ring-1 ring-primary/10"
-                      : ""
+          <div className="mt-20 grid gap-6 lg:grid-cols-3">
+            {pricingTiers.map((tier) => (
+              <Card
+                key={tier.name}
+                className={`flex flex-col rounded-3xl p-8 shadow-card transition-transform hover:scale-[1.02] ${
+                  tier.highlighted ? "border-primary ring-1 ring-primary/20" : "border-border/50"
+                }`}
+              >
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold">{tier.name}</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold tracking-tight">{tier.price}</span>
+                    <span className="text-sm text-muted-foreground">/mo</span>
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">{tier.description}</p>
+                </div>
+
+                <div className="flex-1 space-y-3">
+                  {tier.features.map((f) => (
+                    <div key={f} className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button
+                  className={`mt-8 h-11 w-full rounded-xl font-semibold ${
+                    tier.highlighted ? "shadow-premium" : "bg-muted text-foreground hover:bg-muted/80"
                   }`}
+                  variant={tier.highlighted ? "default" : "secondary"}
+                  asChild
                 >
-                  {tier.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                        Most Popular
-                      </span>
-                    </div>
-                  )}
-
-                  <CardHeader>
-                    <CardTitle>{tier.name}</CardTitle>
-                    <div className="mt-2">
-                      <span className="text-3xl font-bold">{tier.price}</span>
-                      {tier.period && (
-                        <span className="text-sm text-muted-foreground">
-                          {" "}
-                          {tier.period}
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {tier.description}
-                    </p>
-                  </CardHeader>
-
-                  <CardContent className="flex flex-1 flex-col">
-                    <ul className="flex-1 space-y-2">
-                      {tier.features.map((feature) => (
-                        <li
-                          key={feature}
-                          className="flex items-start gap-2 text-sm"
-                        >
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Button
-                      className="mt-6 w-full"
-                      variant={tier.highlighted ? "primary" : "outline"}
-                      asChild
-                    >
-                      <Link href={tier.href}>{tier.cta}</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  <Link href="/sign-up">{tier.cta}</Link>
+                </Button>
+              </Card>
+            ))}
           </div>
         </section>
 
         {/* ─── FAQ ─── */}
-        <section id="faq" className="py-20">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Frequently asked questions
-              </h2>
-            </div>
-
-            <div className="mt-10">
-              {faqItems.map((item) => (
+        <section id="faq" className="bg-muted/30 py-24 lg:py-32">
+          <div className="container max-w-4xl px-6">
+            <h2 className="text-center text-3xl font-bold tracking-tight sm:text-4xl">Common questions</h2>
+            <div className="mt-12 space-y-1">
+              {[
+                { q: "How secure is my data?", a: "We encrypt all data at rest and in transit. Your documents are strictly scoped to your bot and never used for training foundation models." },
+                { q: "Can I use my own models?", a: "You can choose between OpenAI, Anthropic, and Groq models. We use our API keys by default, or you can bring your own for custom limits." },
+                { q: "Does it work with WordPress?", a: "Yes. Our widget works with any site that allows you to paste a single script tag into the head or body." },
+              ].map((item) => (
                 <FAQItem key={item.q} item={item} />
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Final CTA ─── */}
-        <section className="border-t py-20">
-          <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Ready to transform your support?
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Join hundreds of businesses using SupportIQ to deliver faster,
-              smarter customer support.
-            </p>
-            <div className="mt-8">
-              <Button size="lg" asChild>
-                <Link href="/sign-up">Get Started Free →</Link>
-              </Button>
             </div>
           </div>
         </section>
       </main>
 
       <SiteFooter />
-    </>
+    </div>
   );
 }

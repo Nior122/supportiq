@@ -30,6 +30,7 @@ export interface ChatOptions {
   messages: ChatMessage[];
   temperature?: number;
   systemPrompt?: string;
+  onFinish?: (event: { text: string; usage: { promptTokens: number; completionTokens: number; totalTokens: number } }) => Promise<void> | void;
 }
 
 /**
@@ -78,7 +79,7 @@ function getModel(provider: ModelProvider, modelId: string) {
  * here lets the route use that helper while `chatComplete` still reads `.textStream`.
  */
 export async function chatStream(options: ChatOptions) {
-  const { provider, modelId, messages, temperature = 0.7, systemPrompt } = options;
+  const { provider, modelId, messages, temperature = 0.7, systemPrompt, onFinish } = options;
 
   const allMessages = [
     ...(systemPrompt ? [{ role: "system" as const, content: systemPrompt }] : []),
@@ -94,6 +95,7 @@ export async function chatStream(options: ChatOptions) {
     // 8192 is the max output for llama-3.3-70b-versatile on Groq and is safe
     // across OpenAI and Anthropic as well.
     maxTokens: 8192,
+    onFinish,
   });
 
   return result;

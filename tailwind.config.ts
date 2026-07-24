@@ -110,9 +110,9 @@ const config: Config = {
       },
       boxShadow: {
         soft: "0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 6px -1px rgb(0 0 0 / 0.06)",
-        card: "0 1px 3px 0 rgb(0 0 0 / 0.05), 0 4px 16px -4px rgb(0 0 0 / 0.08)",
+        card: "0 0 0 1px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05)",
         elevated:
-          "0 4px 12px -2px rgb(0 0 0 / 0.08), 0 12px 32px -8px rgb(0 0 0 / 0.12)",
+          "0 0 0 1px rgba(0,0,0,.03), 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 12px 32px -8px rgb(0 0 0 / 0.12)",
         glow: "0 0 0 1px hsl(var(--primary) / 0.1), 0 8px 24px -4px hsl(var(--primary) / 0.25)",
       },
       backgroundImage: {

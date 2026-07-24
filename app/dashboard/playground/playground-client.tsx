@@ -47,12 +47,14 @@ export function PlaygroundClient({ bots }: PlaygroundClientProps) {
 
   if (bots.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Bot className="h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">No bots to test</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create a bot first, then come back to the playground.
+      <Card className="border-border/40 bg-background shadow-sm">
+        <CardContent className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
+            <Bot className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+          <h3 className="mt-6 text-[15px] font-bold">No bots to test</h3>
+          <p className="mt-2 max-w-sm text-[14px] text-muted-foreground">
+            Create an assistant first, then come back to the playground to start testing.
           </p>
         </CardContent>
       </Card>
@@ -60,94 +62,80 @@ export function PlaygroundClient({ bots }: PlaygroundClientProps) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-4">
+    <div className="grid gap-10 lg:grid-cols-12">
       {/* Bot info panel */}
-      <div className="space-y-4 lg:col-span-1">
+      <div className="space-y-6 lg:col-span-4">
         {/* Bot selector */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Select Bot</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select value={selectedBotId} onValueChange={setSelectedBotId}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {bots.map((bot) => (
-                  <SelectItem key={bot.publicId} value={bot.publicId}>
-                    {bot.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">Active Assistant</label>
+          <Select value={selectedBotId} onValueChange={setSelectedBotId}>
+            <SelectTrigger className="h-11 rounded-xl border-border/40 bg-background shadow-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border/40 shadow-elevated">
+              {bots.map((bot) => (
+                <SelectItem key={bot.publicId} value={bot.publicId} className="rounded-lg">
+                  {bot.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Bot details */}
         {selectedBot && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Bot Info</CardTitle>
+          <Card className="border-border/40 bg-background shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/10 border-b border-border/40 pb-4">
+              <CardTitle className="text-[13px] font-bold uppercase tracking-wider text-foreground/70">Configuration</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4 p-6">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
+                <span className="text-[13px] font-medium text-muted-foreground">Status</span>
                 <Badge
-                  variant={
-                    selectedBot.status === "ACTIVE"
-                      ? "success"
-                      : selectedBot.status === "PAUSED"
-                        ? "warning"
-                        : "secondary"
-                  }
+                  variant="secondary"
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest",
+                    selectedBot.status === "ACTIVE" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                  )}
                 >
                   {selectedBot.status.toLowerCase()}
                 </Badge>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Cpu className="h-3 w-3" />
+                <span className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
+                  <Cpu className="h-3.5 w-3.5 text-muted-foreground/40" />
                   Provider
                 </span>
-                <span className="text-sm font-medium">
+                <span className="text-[13px] font-bold text-foreground/80">
                   {selectedBot.modelProvider}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Model</span>
-                <span className="text-sm font-medium">
+                <span className="text-[13px] font-medium text-muted-foreground">Model</span>
+                <span className="text-[13px] font-bold text-foreground/80">
                   {selectedBot.modelId}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Thermometer className="h-3 w-3" />
+                <span className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
+                  <Thermometer className="h-3.5 w-3.5 text-muted-foreground/40" />
                   Temperature
                 </span>
-                <span className="text-sm font-medium">
+                <span className="text-[13px] font-bold text-foreground/80">
                   {selectedBot.temperature}
                 </span>
               </div>
 
-              {selectedBot.persona && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Persona</span>
-                  <span className="max-w-[120px] truncate text-sm font-medium">
-                    {selectedBot.persona}
-                  </span>
+              <div className="rounded-xl border border-border/40 bg-muted/20 p-4">
+                <div className="flex gap-2">
+                  <Info className="h-4 w-4 shrink-0 text-primary/60" />
+                  <p className="text-[12px] leading-relaxed text-muted-foreground/80">
+                    Playground responses are grounded in your Knowledge Base context.
+                  </p>
                 </div>
-              )}
-
-              <div className="rounded-lg bg-muted/50 p-3">
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Info className="h-3 w-3" />
-                  This bot is running in playground mode. Responses may use
-                  knowledge base data if documents are uploaded.
-                </p>
               </div>
             </CardContent>
           </Card>
@@ -155,21 +143,28 @@ export function PlaygroundClient({ bots }: PlaygroundClientProps) {
       </div>
 
       {/* Chat area */}
-      <div className="lg:col-span-3">
-        <Card className="h-[calc(100dvh-220px)]">
-          <CardContent className="h-full p-0">
-            {selectedBot && (
-              <ChatWidget
-                key={selectedBot.publicId}
-                botPublicId={selectedBot.publicId}
-                greeting={
-                  selectedBot.greeting ??
-                  `Hi! I'm ${selectedBot.name}. How can I help you today?`
-                }
-              />
-            )}
-          </CardContent>
-        </Card>
+      <div className="lg:col-span-8 flex justify-center">
+        <div className="w-full max-w-2xl">
+          <Card className="h-[700px] overflow-hidden rounded-[32px] border-[8px] border-muted/20 bg-background shadow-elevated">
+            <CardContent className="h-full p-0">
+              {selectedBot && (
+                <ChatWidget
+                  key={selectedBot.publicId}
+                  botPublicId={selectedBot.publicId}
+                  botName={selectedBot.name}
+                  greeting={
+                    selectedBot.greeting ??
+                    `Hi! I'm ${selectedBot.name}. How can I help you today?`
+                  }
+                />
+              )}
+            </CardContent>
+          </Card>
+          <div className="mt-6 flex items-center justify-center gap-2">
+             <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40">Real-time Simulation</span>
+          </div>
+        </div>
       </div>
     </div>
   );

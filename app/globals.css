@@ -18,72 +18,72 @@
 
 @layer base {
   :root {
-    /* Surfaces */
+    /* Surfaces — Warm, sophisticated light mode */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 224 71.4% 4.1%;
 
-    /* Brand */
-    --primary: 239 84% 67%; /* indigo-500 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 239 84% 95%; /* indigo-50 */
-    --accent-foreground: 239 84% 40%;
+    /* Brand — Professional Indigo */
+    --primary: 243 75% 59%; /* indigo-600 */
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
 
     /* Semantics */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
     --success: 142 71% 45%;
-    --success-foreground: 0 0% 100%;
+    --success-foreground: 210 20% 98%;
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 210 20% 98%;
 
-    /* Lines + rings */
+    /* Lines + rings — Softer for premium feel */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 239 84% 67%;
+    --ring: 243 75% 59%;
 
-    /* Geometry — 8px base */
-    --radius: 0.625rem; /* 10px — modern, softly rounded cards */
+    /* Geometry */
+    --radius: 0.5rem; /* 8px — sharper, more professional than 10px */
   }
 
   .dark {
-    /* Surfaces (cool-toned dark — Linear style) */
-    --background: 222 47% 7%;
+    /* Surfaces — Deep, premium Dark Mode (Linear/Vercel inspired) */
+    --background: 224 71% 4%;
     --foreground: 210 20% 98%;
-    --card: 222 44% 9%;
+    --card: 224 71% 4%;
     --card-foreground: 210 20% 98%;
-    --popover: 222 44% 9%;
+    --popover: 224 71% 4%;
     --popover-foreground: 210 20% 98%;
 
-    /* Brand (slightly lighter indigo reads better on dark) */
-    --primary: 239 84% 73%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 222 32% 14%;
+    /* Brand */
+    --primary: 243 75% 65%;
+    --primary-foreground: 224 71% 4%;
+    --secondary: 215 27.9% 16.9%;
     --secondary-foreground: 210 20% 98%;
-    --muted: 222 32% 16%;
-    --muted-foreground: 220 14% 64%;
-    --accent: 239 54% 18%;
-    --accent-foreground: 239 84% 85%;
+    --muted: 215 27.9% 12%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
 
-    /* Semantics (brightened for dark bg contrast) */
-    --destructive: 0 72% 60%;
+    /* Semantics */
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
-    --success: 142 71% 55%;
-    --success-foreground: 222 47% 11%;
-    --warning: 38 92% 60%;
-    --warning-foreground: 222 47% 11%;
+    --success: 142 71% 45%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
 
     /* Lines + rings */
-    --border: 222 25% 18%;
-    --input: 222 25% 20%;
-    --ring: 239 84% 73%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 243 75% 65%;
   }
 }
 
@@ -94,52 +94,55 @@
 
   html {
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
   }
 
-  /* Stereo focus ring — visible in both light/dark, keyboard reachable */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  /* Typography Refinement */
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-medium;
   }
 
-  /* Custom scrollbars — match the muted palette so they don't visually shout */
+  /* Selection uses a refined primary tint */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+  }
+
+  /* Custom Scrollbar — Discrete & Professional */
   ::-webkit-scrollbar {
-    @apply h-2 w-2;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-muted-foreground/30 transition-colors;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
-  }
-
-  /* Selection uses the brand color for a branded feel */
-  ::selection {
-    @apply bg-primary/20 text-foreground;
+    @apply bg-muted-foreground/10 rounded-full hover:bg-muted-foreground/20 transition-colors;
   }
 }
 
 @layer components {
-  /**
-   * Glass effect — used sparingly on elevated overlays (command palette, hero card).
-   * `backdrop-blur` + translucent bg + hairline border = the depth cue.
-   */
+  /* Premium Glass Effects */
   .glass {
-    @apply border border-border/60 bg-background/70 backdrop-blur-xl;
+    @apply bg-background/60 backdrop-blur-md border border-white/10 shadow-[0_0_1px_1px_rgba(255,255,255,0.05)_inset];
   }
 
-  .glass-dark {
-    @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+  /* Multi-layered Premium Shadows */
+  .shadow-premium {
+    shadow: 0 0 0 1px rgba(0,0,0,.03), 0 2px 4px rgba(0,0,0,.05), 0 12px 24px rgba(0,0,0,.05);
   }
+
+  .dark .shadow-premium {
+    shadow: 0 0 0 1px rgba(255,255,255,.05), 0 2px 4px rgba(0,0,0,.2), 0 12px 24px rgba(0,0,0,.2);
+  }
+}
 
   /**
    * Skeleton shimmer — placeholder for loading states. The pseudo-element slides

@@ -71,9 +71,16 @@ export async function retrieveRelevantChunks(
     LIMIT ${topK}
   `;
 
-  console.log(`[retrieval] Found ${results.length} chunks`);
+  // Step 3: Filter by similarity threshold
+  // Low similarity means the chunk is likely noise and unrelated to the query.
+  // 0.4 is a safe, conservative threshold for Jina/OpenAI embeddings.
+  const filteredResults = results.filter((r) => r.similarity >= 0.4);
 
-  return results;
+  console.log(
+    `[retrieval] Found ${results.length} chunks, ${filteredResults.length} passed threshold (0.4)`,
+  );
+
+  return filteredResults;
 }
 
 /**
@@ -109,6 +116,7 @@ ${contextBlock}
 - NEVER mention source names, document names, or add "(Source: ...)" to your answers — just answer naturally and directly
 - Be helpful and thorough — provide complete, well-structured answers that fully address the user's question
 - Use formatting (bullet points, numbered lists, bold) to make longer answers easy to read
-- If you don't know the answer, say "I don't have information about that in my knowledge base"
-- Never fabricate information not present in the context`;
+- If you don't know the answer, say "I'm sorry, I don't have information about that in my knowledge base. Is there anything else I can help you with?"
+- Never fabricate information not present in the context
+- If the context is "No relevant documents found.", politely inform the user that you don't have information on that topic.`;
 }

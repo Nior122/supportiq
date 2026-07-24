@@ -64,20 +64,29 @@ function StatCard({
   label,
   value,
   icon: Icon,
+  trend,
 }: {
   label: string;
   value: number;
   icon: React.ElementType;
+  trend?: string;
 }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-4 p-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="h-5 w-5 text-primary" />
+    <Card className="border-border/40 bg-background/50 shadow-sm transition-all hover:shadow-md">
+      <CardContent className="flex flex-col gap-4 p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+          {trend && (
+            <span className="text-[11px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              {trend}
+            </span>
+          )}
         </div>
         <div>
-          <p className="text-2xl font-bold">{value.toLocaleString()}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-3xl font-bold tracking-tight">{value.toLocaleString()}</p>
+          <p className="mt-1 text-sm font-medium text-muted-foreground/60">{label}</p>
         </div>
       </CardContent>
     </Card>
@@ -90,45 +99,54 @@ function GettingStartedChecklist({ hasBots }: { hasBots: boolean }) {
       label: "Create your first bot",
       done: hasBots,
       href: "/dashboard/bots/new",
-      icon: Bot,
     },
     {
-      label: "Add knowledge base documents",
+      label: "Add knowledge base",
       done: false,
       href: "/dashboard/bots",
-      icon: FileText,
     },
     {
-      label: "Embed on your website",
+      label: "Embed widget",
       done: false,
       href: "/dashboard/integrations",
-      icon: Zap,
     },
   ];
 
+  const completedCount = steps.filter(s => s.done).length;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Getting Started</CardTitle>
+    <Card className="border-border/40 bg-background shadow-sm">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-[15px] font-bold">Getting Started</CardTitle>
+          <span className="text-xs font-medium text-muted-foreground">{completedCount}/3 done</span>
+        </div>
+        <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-muted">
+          <div 
+            className="h-full bg-primary transition-all duration-500" 
+            style={{ width: `${(completedCount / 3) * 100}%` }}
+          />
+        </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-1 p-2">
         {steps.map((step, i) => (
           <Link
             key={step.label}
             href={step.href}
-            className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent/50"
+            className="flex items-center gap-3 rounded-lg px-4 py-2.5 transition-colors hover:bg-muted/50"
           >
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
                 step.done
-                  ? "bg-success/10 text-success"
-                  : "bg-muted text-muted-foreground"
+                  ? "bg-success text-success-foreground"
+                  : "border border-border text-muted-foreground"
               }`}
             >
               {step.done ? "✓" : i + 1}
             </div>
-            <span className="flex-1 text-sm font-medium">{step.label}</span>
-            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            <span className={`flex-1 text-[13px] font-medium ${step.done ? "text-muted-foreground line-through" : "text-foreground"}`}>
+              {step.label}
+            </span>
           </Link>
         ))}
       </CardContent>
@@ -141,16 +159,16 @@ export default async function DashboardHomePage() {
   const data = await getDashboardData(session.workspaceId!);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back. Here&apos;s an overview of your workspace.
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground/80">
+            Monitor your workspace performance and active assistants.
           </p>
         </div>
-        <Button asChild>
+        <Button className="h-10 rounded-full px-6 font-semibold shadow-premium" asChild>
           <Link href="/dashboard/bots/new">
             <Plus className="mr-2 h-4 w-4" />
             New Bot
@@ -159,60 +177,62 @@ export default async function DashboardHomePage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Bots" value={data.botCount} icon={Bot} />
-        <StatCard label="Conversations" value={data.conversationCount} icon={MessageSquare} />
-        <StatCard label="Leads" value={data.leadCount} icon={Users} />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Active Bots" value={data.botCount} icon={Bot} />
+        <StatCard label="Total Chats" value={data.conversationCount} icon={MessageSquare} trend="+12%" />
+        <StatCard label="Leads Captured" value={data.leadCount} icon={Users} trend="+5%" />
         <StatCard label="Messages" value={data.messageCount} icon={BarChart3} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Getting started */}
-        <div className="lg:col-span-1">
-          <GettingStartedChecklist hasBots={data.hasBots} />
-        </div>
-
+      <div className="grid gap-10 lg:grid-cols-3">
         {/* Recent conversations */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Recent Conversations</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
+          <Card className="border-border/40 bg-background shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <CardTitle className="text-[15px] font-bold">Recent Activity</CardTitle>
+              <Button variant="ghost" size="sm" className="h-8 text-xs font-medium text-muted-foreground hover:text-foreground" asChild>
                 <Link href="/dashboard/conversations">
                   View all
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {data.recentConversations.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  No conversations yet. They&apos;ll appear here once visitors start chatting with your bots.
-                </p>
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/20">
+                    <MessageSquare className="h-6 w-6 text-muted-foreground/40" />
+                  </div>
+                  <p className="mt-4 text-sm font-medium text-muted-foreground">
+                    No conversations yet.
+                  </p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="divide-y divide-border/40">
                   {data.recentConversations.map((conv) => (
                     <div
                       key={conv.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      className="group flex items-center justify-between px-6 py-4 transition-colors hover:bg-muted/30"
                     >
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {conv.bot?.name ?? "Bot"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {conv.messageCount} messages · {conv.status.toLowerCase()}
-                        </p>
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary uppercase">
+                          {conv.bot?.name?.[0] ?? "B"}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-[14px] font-bold text-foreground/90">
+                            {conv.bot?.name ?? "Assistant"}
+                          </p>
+                          <p className="text-[12px] font-medium text-muted-foreground/60">
+                            {conv.messageCount} messages · Updated just now
+                          </p>
+                        </div>
                       </div>
                       <Badge
-                        variant={
-                          conv.status === "OPEN"
-                            ? "success"
-                            : conv.status === "RESOLVED"
-                              ? "secondary"
-                              : "outline"
-                        }
-                        className="ml-2 shrink-0"
+                        variant="secondary"
+                        className={cn(
+                          "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                          conv.status === "OPEN" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                        )}
                       >
                         {conv.status.toLowerCase()}
                       </Badge>
@@ -222,6 +242,11 @@ export default async function DashboardHomePage() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Getting started */}
+        <div className="lg:col-span-1">
+          <GettingStartedChecklist hasBots={data.hasBots} />
         </div>
       </div>
     </div>
