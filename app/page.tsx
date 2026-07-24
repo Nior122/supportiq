@@ -123,9 +123,10 @@ function FAQItem({ item }: { item: { q: string; a: string } }) {
 
 export default function LandingPage() {
   return (
-    <main className="flex-1">
-      {/* ─── Hero ─── */}
-      <section className="relative pt-24 lg:pt-32 min-h-[80vh] flex flex-col items-center justify-center">
+    <div className="pointer-events-auto">
+      <main className="flex-1">
+        {/* ─── Hero ─── */}
+        <section className="relative pt-24 lg:pt-32 min-h-[80vh] flex flex-col items-center justify-center">
         <div className="container relative px-6">
           <div className="mx-auto max-w-[800px] text-center">
             <motion.div
@@ -305,5 +306,6 @@ export default function LandingPage() {
         </div>
       </section>
     </main>
+    </div>
   );
 }

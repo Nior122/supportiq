@@ -58,14 +58,23 @@ export default function RootLayout({
     >
       <body className="min-h-dvh bg-black font-sans antialiased overflow-x-hidden">
         <GlobalSplineBackground />
+        
+        {/* Content Layer: Interactivity is handled via pointer-events-auto on sub-elements */}
         <div className="relative z-10 flex flex-col min-h-dvh pointer-events-none">
-          <SiteHeader />
-          <main className="flex-1">
-            <Providers>{children}</Providers>
-          </main>
-          <div className="pointer-events-auto">
-            <SiteFooter />
-          </div>
+          <Providers>
+            <div className="pointer-events-auto">
+              <SiteHeader />
+            </div>
+            
+            <main className="flex-1 pointer-events-none">
+              {/* Every page will need to wrap its interactive content in a pointer-events-auto div if it wants to be clickable */}
+              {children}
+            </main>
+            
+            <div className="pointer-events-auto">
+              <SiteFooter />
+            </div>
+          </Providers>
         </div>
       </body>
     </html>
