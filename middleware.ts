@@ -31,7 +31,6 @@ const isAuthRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   // Protect dashboard + sensitive APIs. `auth.protect()` short-circuits to the
   // Clerk-hosted sign-in route with a redirect-back, so we don't build that flow.
-  // NOTE: in clerkMiddleware, `auth` IS the resolved auth object — do NOT call auth().
   if (isProtectedRoute(req)) {
     await auth.protect();
     return;
@@ -40,7 +39,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Reverse-gate: signed-in users visiting auth-only routes are bounced to the app,
   // which is the friendly behavior (no "you're already signed in" dead-end pages).
   if (isAuthRoute(req)) {
-    const authObj = await auth;
+    const authObj = await auth();
     if (authObj.userId) {
       const url = req.nextUrl.clone();
       url.pathname = "/dashboard";
