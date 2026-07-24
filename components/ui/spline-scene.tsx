@@ -1,21 +1,18 @@
 'use client'
 
-import React, { Suspense, lazy, useMemo } from 'react'
-const Spline = lazy(() => import('@splinetool/react-spline'))
+import React, { Suspense } from 'react'
+import Spline from '@splinetool/react-spline'
 
 interface SplineSceneProps {
   scene: string
   className?: string
 }
 
+/**
+ * Low-level Spline player.
+ * Wrapped in React.memo to ensure it only re-renders if scene URL or className changes.
+ */
 export const SplineScene = React.memo(function SplineScene({ scene, className }: SplineSceneProps) {
-  const splineElement = useMemo(() => (
-    <Spline
-      scene={scene}
-      className={className}
-    />
-  ), [scene, className])
-
   return (
     <Suspense 
       fallback={
@@ -24,8 +21,10 @@ export const SplineScene = React.memo(function SplineScene({ scene, className }:
         </div>
       }
     >
-      {splineElement}
+      <Spline
+        scene={scene}
+        className={className}
+      />
     </Suspense>
   )
 })
-
