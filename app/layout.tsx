@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Providers } from "@/components/providers/providers";
+import { GlobalSplineBackground } from "@/components/ui/global-spline-background";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -53,8 +54,11 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-dvh bg-background font-sans antialiased">
-        <Providers>{children}</Providers>
+      <body className="min-h-dvh bg-black font-sans antialiased">
+        <GlobalSplineBackground />
+        <div className="relative z-10 pointer-events-none min-h-dvh flex flex-col [&_header]:pointer-events-auto [&_footer]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_[role='button']]:pointer-events-auto">
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );
