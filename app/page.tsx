@@ -133,16 +133,18 @@ function FAQItem({ item }: { item: { q: string; a: string } }) {
 
 export default function LandingPage() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-black selection:bg-primary/10 selection:text-primary overflow-x-hidden">
+    <div className="relative flex min-h-screen flex-col selection:bg-primary/10 selection:text-primary overflow-x-hidden">
       <JsonLd type="landing" />
       
       {/* ─── Fixed Immersive Background ─── */}
-      <div className="fixed inset-0 -z-10 flex items-center justify-center overflow-hidden pt-14">
-        <div className="w-full h-full max-w-7xl max-h-[80vh]">
-          <SplineScene 
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="w-full h-full"
-          />
+      <div className="fixed inset-0 z-0 overflow-hidden bg-black">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-full h-full max-w-7xl max-h-[80vh]">
+            <SplineScene 
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full"
+            />
+          </div>
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/80 pointer-events-none" />
         <Spotlight
@@ -151,12 +153,13 @@ export default function LandingPage() {
         />
       </div>
 
+      {/* ─── Content Layer ─── */}
       <div className="relative z-10 flex flex-col min-h-screen">
         <SiteHeader />
 
         <main className="flex-1 pointer-events-none">
           {/* ─── Hero ─── */}
-          <section className="relative pt-24 lg:pt-32">
+          <section className="relative pt-12 lg:pt-20">
             <div className="container relative px-6">
               <div className="mx-auto max-w-[800px] text-center">
                 <motion.div
@@ -164,7 +167,7 @@ export default function LandingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary pointer-events-auto">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary pointer-events-auto">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
