@@ -176,10 +176,10 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
               >
-                <Button size="lg" className="h-12 rounded-full px-8 font-semibold shadow-glow" asChild>
+                <Button size="lg" className="h-12 rounded-none px-8 font-mono font-bold uppercase tracking-wider shadow-glow" asChild>
                   <Link href="/sign-up">Start for free</Link>
                 </Button>
-                <Button size="lg" variant="ghost" className="h-12 rounded-full px-8 font-semibold text-primary hover:bg-primary/10" asChild>
+                <Button size="lg" variant="ghost" className="h-12 rounded-none px-8 font-mono font-bold uppercase tracking-wider text-primary hover:bg-primary/10" asChild>
                   <a href="#features" className="group">
                     See Features <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </a>
@@ -338,6 +338,23 @@ export default function LandingPage() {
           <div className="container max-w-4xl px-6">
             <h2 className="text-center text-3xl font-bold tracking-tight sm:text-4xl text-primary">Common questions</h2>
             <div className="mt-12 space-y-1">
+              {[
+                { q: "How secure is my data?", a: "We encrypt all data at rest and in transit. Your documents are strictly scoped to your bot and never used for training foundation models." },
+                { q: "Can I use my own models?", a: "You can choose between OpenAI, Anthropic, and Groq models. We use our API keys by default, or you can bring your own for custom limits." },
+                { q: "Does it work with WordPress?", a: "Yes. Our widget works with any site that allows you to paste a single script tag into the head or body." },
+              ].map((item) => (
+                <FAQItem key={item.q} item={item} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
+    </div>
+  );
+}
+e="mt-12 space-y-1">
               {[
                 { q: "How secure is my data?", a: "We encrypt all data at rest and in transit. Your documents are strictly scoped to your bot and never used for training foundation models." },
                 { q: "Can I use my own models?", a: "You can choose between OpenAI, Anthropic, and Groq models. We use our API keys by default, or you can bring your own for custom limits." },
