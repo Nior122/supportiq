@@ -46,16 +46,16 @@ export function SiteHeader() {
           <SignedOut>
             <Link 
               href="/sign-in" 
-              className="text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary font-mono"
             >
               Sign In
             </Link>
-            <Button size="sm" className="h-8 rounded-full px-4 text-xs font-semibold tracking-wide" asChild>
+            <Button size="sm" className="h-8 rounded-none px-4 text-[10px] font-bold uppercase tracking-widest" asChild>
               <Link href="/sign-up">Start Free</Link>
             </Button>
           </SignedOut>
           <SignedIn>
-            <Button size="sm" variant="secondary" className="h-8 rounded-full px-4 text-xs font-semibold" asChild>
+            <Button size="sm" variant="secondary" className="h-8 rounded-none px-4 text-[10px] font-bold uppercase tracking-widest" asChild>
               <Link href="/dashboard">Dashboard</Link>
             </Button>
             <UserButton afterSignOutUrl="/" />

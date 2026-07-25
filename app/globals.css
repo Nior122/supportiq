@@ -3,69 +3,69 @@
 @tailwind utilities;
 
 /**
- * DESIGN SYSTEM TOKENS — ABSOLUTE DARK (BLACK & BLUE)
+ * DESIGN SYSTEM TOKENS — CYBER CYAN (ABS DARK)
  * -------------------
- * High-contrast professional theme with absolute black backgrounds 
- * and vibrant blue foregrounds.
+ * High-contrast technological theme with absolute black backgrounds 
+ * and vibrant electric cyan foregrounds.
  */
 
 @layer base {
   :root {
     /* Absolute Dark Mode as Default */
     --background: 0 0% 0%;      /* Absolute Black #000000 */
-    --foreground: 221 83% 53%;  /* Vibrant Blue #2172E5 */
+    --foreground: 180 100% 50%;  /* Electric Cyan #00FFFF */
     --card: 0 0% 0%;
-    --card-foreground: 221 83% 53%;
+    --card-foreground: 180 100% 50%;
     --popover: 0 0% 0%;
-    --popover-foreground: 221 83% 53%;
+    --popover-foreground: 180 100% 50%;
 
     /* Brand */
-    --primary: 221 83% 53%;
+    --primary: 180 100% 50%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 221 83% 53%;
-    --muted: 0 0% 8%;
-    --muted-foreground: 221 83% 53% / 0.6;
-    --accent: 0 0% 12%;
-    --accent-foreground: 221 83% 53%;
+    --secondary: 0 0% 5%;
+    --secondary-foreground: 180 100% 50%;
+    --muted: 0 0% 5%;
+    --muted-foreground: 180 100% 50% / 0.6;
+    --accent: 0 0% 10%;
+    --accent-foreground: 180 100% 50%;
 
-    /* Semantics - Muted to keep focus on Blue/Black */
+    /* Semantics - Muted to keep focus on Cyan/Black */
     --destructive: 0 100% 50%; /* Red for errors */
     --destructive-foreground: 0 0% 0%;
-    --success: 142 70% 50%;
+    --success: 142 100% 50%;
     --success-foreground: 0 0% 0%;
-    --warning: 48 96% 50%;
+    --warning: 48 100% 50%;
     --warning-foreground: 0 0% 0%;
 
     /* Lines + rings */
-    --border: 221 83% 53% / 0.2;
-    --input: 221 83% 53% / 0.2;
-    --ring: 221 83% 53%;
+    --border: 180 100% 50% / 0.15;
+    --input: 180 100% 50% / 0.15;
+    --ring: 180 100% 50%;
 
-    --radius: 0rem; 
+    --radius: 0.125rem; 
   }
 
   /* Force dark mode variables even if 'dark' class is missing */
   .dark {
     --background: 0 0% 0%;
-    --foreground: 221 83% 53%;
+    --foreground: 180 100% 50%;
     --card: 0 0% 0%;
-    --card-foreground: 221 83% 53%;
+    --card-foreground: 180 100% 50%;
     --popover: 0 0% 0%;
-    --popover-foreground: 221 83% 53%;
+    --popover-foreground: 180 100% 50%;
 
-    --primary: 221 83% 53%;
+    --primary: 180 100% 50%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 221 83% 53%;
-    --muted: 0 0% 8%;
-    --muted-foreground: 221 83% 53% / 0.6;
-    --accent: 0 0% 12%;
-    --accent-foreground: 221 83% 53%;
+    --secondary: 0 0% 5%;
+    --secondary-foreground: 180 100% 50%;
+    --muted: 0 0% 5%;
+    --muted-foreground: 180 100% 50% / 0.6;
+    --accent: 0 0% 10%;
+    --accent-foreground: 180 100% 50%;
 
-    --border: 221 83% 53% / 0.2;
-    --input: 221 83% 53% / 0.2;
-    --ring: 221 83% 53%;
+    --border: 180 100% 50% / 0.15;
+    --input: 180 100% 50% / 0.15;
+    --ring: 180 100% 50%;
   }
 }
 
@@ -88,7 +88,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold uppercase;
+    @apply tracking-tight font-bold uppercase font-mono;
   }
 
   ::selection {
