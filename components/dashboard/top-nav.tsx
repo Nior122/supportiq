@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * SupportIQ Dashboard TopNav - Premium AI Rebrand
+ * SupportIQ Dashboard TopNav - Premium AI Blue
  */
 import { useOrganization } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
-import { Moon, Sun, Menu, Home, Sparkles } from "lucide-react";
+import { Moon, Sun, Menu, Home, ZapIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -19,86 +19,67 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
   const { setTheme, resolvedTheme } = useTheme();
 
   function cycleTheme() {
-    if (resolvedTheme === "dark") {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b border-white/5 bg-background/60 px-8 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
-      {/* Mobile hamburger */}
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/80 px-6 backdrop-blur dark:bg-[#020617]/80 dark:border-slate-800">
+      {/* Mobile Hamburger */}
       <Button
         variant="ghost"
         size="icon"
-        className="h-10 w-10 lg:hidden text-primary"
+        className="h-9 w-9 lg:hidden text-slate-500"
         onClick={onToggleSidebar}
         aria-label="Toggle sidebar"
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Workspace Context */}
-      <div className="flex items-center gap-4">
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest font-mono">
-           <Sparkles className="h-3 w-3" />
-           AI_MODE: PRO
+      {/* Breadcrumb Context */}
+      <div className="flex items-center gap-2 transition-opacity hover:opacity-80">
+        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600 shadow-sm">
+           <ZapIcon className="h-3 w-3 text-white fill-white" />
         </div>
-        
-        <div className="h-4 w-[1px] bg-white/10 hidden lg:block" />
-
-        <Link href="/" className="flex items-center gap-3 group transition-all">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-ai-gradient shadow-glow text-[12px] font-black text-white font-mono uppercase">
-            {organization?.name?.[0] ?? "S"}
-          </div>
-          <div className="flex flex-col">
-             <span className="text-[14px] font-black text-foreground leading-none tracking-tight">
-               {organization?.name ?? "SupportIQ Console"}
-             </span>
-             <span className="text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest mt-1">Workspace_Default</span>
-          </div>
-        </Link>
+        <div className="flex items-center text-sm font-bold text-slate-900 dark:text-white">
+          {organization?.name ?? "SupportIQ Console"}
+        </div>
       </div>
 
       <div className="flex-1" />
 
-      <div className="flex items-center gap-6">
-        {/* Quick Actions */}
-        <div className="hidden md:flex items-center gap-2">
-           <Button
-             variant="ghost"
-             size="sm"
-             asChild
-             className="text-muted-foreground hover:text-primary font-bold uppercase tracking-tighter text-[11px] font-mono"
-           >
-             <Link href="/">
-               <Home className="h-3.5 w-3.5 mr-2" />
-               Public_Site
-             </Link>
-           </Button>
-        </div>
-
-        <div className="h-4 w-[1px] bg-white/10" />
-
-        {/* Theme toggle */}
+      <div className="flex items-center gap-4">
+        {/* Global Nav */}
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-sm"
+          asChild
+          className="text-slate-500 hover:text-blue-600 dark:hover:text-white"
+        >
+          <Link href="/">
+            <Home className="h-4 w-4" />
+          </Link>
+        </Button>
+
+        <div className="h-4 w-[1px] bg-slate-200 dark:bg-slate-800" />
+
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={cycleTheme}
           aria-label="Toggle theme"
-          className="h-9 w-9 rounded-xl border border-white/5 bg-white/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm"
+          className="text-slate-500 hover:text-blue-600 dark:hover:text-white"
         >
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
 
-        {/* User avatar */}
+        {/* User context */}
         <UserButton
           afterSignOutUrl="/"
           appearance={{
             elements: {
-              avatarBox: "h-9 w-9 rounded-xl ring-2 ring-primary/20 shadow-glow transition-transform hover:scale-105",
+              avatarBox: "h-8 w-8 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800",
             },
           }}
         />

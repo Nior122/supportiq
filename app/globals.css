@@ -3,78 +3,79 @@
 @tailwind utilities;
 
 /**
- * DESIGN SYSTEM TOKENS — AI PURPLE + INDIGO PREMIUM
+ * DESIGN SYSTEM TOKENS — PREMIUM AI BLUE
  * -------------------
- * Modern, premium SaaS theme inspired by Linear, Stripe, and Vercel.
+ * Enterprise-grade SaaS theme focusing on trust, clarity, and intelligence.
  */
 
 @layer base {
   :root {
-    /* Light Mode */
-    --background: 270 100% 98%;    /* #FAF5FF */
-    --foreground: 221 39% 11%;    /* #111827 */
+    /* Light Mode — Professional & Fast */
+    --background: 210 40% 99%;    /* #F8FAFC */
+    --foreground: 222 47% 11%;    /* #0F172A */
     
     --card: 0 0% 100%;
-    --card-foreground: 221 39% 11%;
+    --card-foreground: 222 47% 11%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 221 39% 11%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Brand */
-    --primary: 258 89% 60%;       /* #7C3AED */
+    /* Brand Colors */
+    --primary: 221 83% 53%;       /* #2563EB - Primary Brand Blue */
+    --primary-dark: 224 76% 40%;  /* #1E40AF - Primary Dark Blue */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 239 76% 59%;     /* #4F46E5 */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 199 89% 48%;     /* #38BDF8 - AI Accent Blue */
+    --secondary-foreground: 222 47% 11%;
     
-    --muted: 270 20% 94%;
+    --ai-purple: 258 89% 60%;     /* #7C3AED - AI Intelligence */
+    
+    --muted: 210 40% 96%;         /* Soft Slate */
     --muted-foreground: 215 16% 47%;
     
-    --accent: 258 94% 77%;        /* #A78BFA */
-    --accent-foreground: 258 89% 60%;
+    --accent: 221 83% 53% / 0.15;
+    --accent-foreground: 221 83% 53%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;        /* #E5E7EB */
+    --border: 214 32% 91%;        /* #E2E8F0 */
     --input: 214 32% 91%;
-    --ring: 258 89% 60%;
+    --ring: 221 83% 53%;
 
-    --radius: 0.75rem; 
+    --radius: 0.75rem;            /* 12px Enterprise Radius */
 
-    /* AI Gradient */
-    --ai-gradient: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+    /* Gradients */
+    --ai-gradient-primary: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    --ai-gradient-secondary: linear-gradient(135deg, #38BDF8 0%, #2563EB 100%);
   }
 
   .dark {
     /* Dark Mode — Premium AI Dashboard */
-    --background: 253 70% 9%;     /* #0F0728 */
-    --foreground: 210 40% 98%;    /* #F9FAFB */
+    --background: 222 47% 5%;     /* #020617 - Absolute Navy */
+    --foreground: 210 40% 98%;    /* #F8FAFC */
     
-    --card: 251 47% 13%;          /* #17112F */
+    --card: 222 47% 11%;          /* #0F172A - Deep Slate Card */
     --card-foreground: 210 40% 98%;
     
-    --popover: 251 47% 13%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 258 89% 60%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 239 76% 59%;
+    --secondary: 199 89% 48%;
     --secondary-foreground: 0 0% 100%;
     
-    --muted: 251 47% 18%;
-    --muted-foreground: 258 94% 85%; /* #C4B5FD */
+    --muted: 222 47% 15%;
+    --muted-foreground: 215 20% 65%;
     
-    --accent: 258 94% 77%;
+    --accent: 221 83% 53% / 0.2;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 253 70% 98% / 0.1;  /* rgba(255,255,255,0.1) */
-    --input: 253 70% 98% / 0.1;
-    --ring: 258 89% 60%;
+    --border: 217 33% 17%;        /* #1E293B */
+    --input: 217 33% 17%;
+    --ring: 221 83% 53%;
   }
 }
 
@@ -91,28 +92,28 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold;
+    @apply tracking-tight font-extrabold text-foreground;
   }
 
   ::selection {
-    background-color: hsl(var(--primary) / 0.3);
+    background-color: hsla(var(--primary) / 0.2);
     color: hsl(var(--primary));
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+    @apply bg-slate-300 dark:bg-slate-800 rounded-full hover:bg-slate-400 dark:hover:bg-slate-700 transition-colors;
   }
 }
 
@@ -122,39 +123,32 @@
   }
 
   .shadow-premium {
-    box-shadow: 0 0 50px -10px rgba(124, 58, 237, 0.15);
+    @apply shadow-[0_8px_30px_rgb(0,0,0,0.04)];
   }
 
   .shadow-glow {
-    box-shadow: 0 0 20px -5px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 15px -5px rgba(37, 99, 235, 0.4);
   }
 
-  .ai-gradient-bg {
-    background: var(--ai-gradient);
+  .ai-gradient-primary {
+    background: var(--ai-gradient-primary);
+  }
+
+  .ai-gradient-secondary {
+    background: var(--ai-gradient-secondary);
   }
 
   .ai-gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: var(--ai-gradient);
-  }
-
-  .skeleton {
-    @apply relative overflow-hidden bg-muted;
-  }
-  .skeleton::after {
-    @apply absolute inset-0 -translate-x-full;
-    content: "";
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--primary) / 0.1),
-      transparent
-    );
-    animation: shimmer 2s infinite;
+    background-image: var(--ai-gradient-primary);
   }
 
   .card-surface {
-    @apply border border-border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/30 hover:shadow-md;
+    @apply border border-border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/20 hover:shadow-md;
+  }
+  
+  .sidebar-active-item {
+    @apply bg-primary/10 text-primary border-r-2 border-primary;
   }
 }
 
@@ -167,32 +161,7 @@
     display: none;
   }
 
-  .prose-chat {
-    @apply text-[0.95rem] leading-relaxed;
+  .prose-saas {
+    @apply text-[0.95rem] leading-relaxed text-slate-600 dark:text-slate-300;
   }
-  .prose-chat pre {
-    @apply my-3 overflow-x-auto border border-border bg-muted p-3 text-sm rounded-lg;
-  }
-  .prose-chat code {
-    @apply bg-muted px-1.5 py-0.5 text-[0.85em] font-medium rounded;
-  }
-  .prose-chat pre code {
-    @apply bg-transparent p-0;
-  }
-  .prose-chat a {
-    @apply font-bold text-primary underline underline-offset-4 hover:opacity-80;
-  }
-  .prose-chat ul {
-    @apply my-2 list-disc space-y-1 pl-6;
-  }
-  .prose-chat ol {
-    @apply my-2 list-decimal space-y-1 pl-6;
-  }
-  .prose-chat blockquote {
-    @apply border-l-4 border-primary/20 pl-3 italic text-muted-foreground;
-  }
-}
-
-@keyframes shimmer {
-  100% { transform: translateX(100%); }
 }
