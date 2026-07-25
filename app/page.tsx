@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button as UIButton } from "@/components/ui/button";
+import { AnimatedBot } from "@/components/landing/animated-bot";
 
 /* ──────────────────────────── Data ──────────────────────────── */
 
@@ -316,19 +317,6 @@ export default function LandingPage() {
                 { q: "How secure is my training data?", a: "SupportIQ employs end-to-end AES-256 encryption. Your documents are never shared or used to train public LLM models." },
                 { q: "Can I bring my own API keys?", a: "Yes. Enterprise customers can bring their own keys for Anthropic, OpenAI, or Groq to maintain complete sovereignty." },
                 { q: "Does it support multilingual chat?", a: "Absolutely. Our AI assistants automatically detect and respond in over 90 languages with native-level proficiency." },
-              ].map((item) => (
-                <FAQItem key={item.q} item={item} />
-              ))}
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
-  );
-}
-tomatically detect and respond in over 90 languages with native-level proficiency." },
               ].map((item) => (
                 <FAQItem key={item.q} item={item} />
               ))}
