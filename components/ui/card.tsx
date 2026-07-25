@@ -1,14 +1,5 @@
 /**
- * WHY THIS FILE EXISTS
- * -------------------
- * Card is the workhorse surface (rounded-xl, hairline border, soft shadow) that every
- * dashboard widget + form wraps in. We expose semantic sub-components (Header/Title/
- * Description/Content/Footer) so the assembly reads like a document, and screen
- * readers can articulate the card structure. Keeping styles on these primitives means
- * a margin inconsistency can't drift between pages.
- *
- * The `interactive` prop adds hover lift + border highlight — used on clickable cards
- * like the bot list (the user intuitively understands the whole card is tappable).
+ * SupportIQ UI Card - Premium AI Rebrand
  */
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -20,9 +11,9 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-border bg-card text-card-foreground shadow-card",
+      "rounded-3xl border border-border bg-card text-card-foreground shadow-card transition-all duration-300",
       interactive &&
-        "transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated",
+        "hover:-translate-y-1 hover:border-primary/40 hover:shadow-premium",
       className,
     )}
     {...props}
@@ -33,7 +24,7 @@ Card.displayName = "Card";
 function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col space-y-1.5 p-6", className)}
+      className={cn("flex flex-col space-y-2 p-8", className)}
       {...props}
     />
   );
@@ -42,7 +33,7 @@ function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+      className={cn("text-xl font-bold leading-tight tracking-tight", className)}
       {...props}
     />
   );
@@ -53,17 +44,17 @@ function CardDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-sm text-muted-foreground", className)} {...props} />
+    <p className={cn("text-sm text-muted-foreground leading-relaxed", className)} {...props} />
   );
 }
 
 function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-6 pt-0", className)} {...props} />;
+  return <div className={cn("p-8 pt-0", className)} {...props} />;
 }
 
 function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center p-6 pt-0", className)} {...props} />
+    <div className={cn("flex items-center p-8 pt-0", className)} {...props} />
   );
 }
 

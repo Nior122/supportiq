@@ -1,29 +1,15 @@
 /**
- * WHY THIS FILE EXISTS
- * -------------------
- * Reusable chat widget component. Used in both:
- *  1. The dashboard playground (for testing bots)
- *  2. The embeddable widget (iframe version)
- *
- * It handles the full chat lifecycle:
- *  - Rendering the message list with markdown
- *  - Sending messages via POST /api/chat
- *  - Streaming responses token-by-token
- *  - Auto-scrolling to the latest message
- *  - Citation display
- *
- * The component is fully self-contained — it takes a `botPublicId` and
- * optionally a `greeting` message, and manages all state internally.
- * No external state management needed for a single conversation.
+ * SupportIQ Chat Widget - Premium AI Rebrand
  */
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Bot, User, Copy, Check } from "lucide-react";
+import { Send, Sparkles, User, Copy, Check, Info } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { TypingIndicator } from "./typing-indicator";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: string;
@@ -35,12 +21,6 @@ interface Message {
     heading: string | null;
     similarity: number;
   }>;
-  /**
-   * Transient typing-indicator status for an in-flight assistant message,
-   * driven by the inband `§STATUS:researching§` / `§STATUS:typing§` sentinels
-   * the chat route emits before the first text token. Cleared (set to
-   * undefined) once real text starts populating the bubble.
-   */
   typingStatus?: "researching" | "typing";
 }
 
@@ -57,6 +37,7 @@ export function ChatWidget({
   botName,
   greeting,
   quickReplies = [],
+  className,
 }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -65,9 +46,8 @@ export function ChatWidget({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Add greeting message on mount
   useEffect(() => {
-    if (greeting) {
+    if (greeting && messages.length === 0) {
       setMessages([
         {
           id: "greeting",
@@ -76,9 +56,8 @@ export function ChatWidget({
         },
       ]);
     }
-  }, [greeting]);
+  }, [greeting, messages.length]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -97,8 +76,6 @@ export function ChatWidget({
         id: `assistant-${Date.now()}`,
         role: "assistant",
         content: "",
-        // Show the Researching pill immediately, before the HTTP response even
-        // arrives — the route will refine this to "typing" via its first sentinel.
         typingStatus: "researching",
       };
 
@@ -107,7 +84,6 @@ export function ChatWidget({
       setIsLoading(true);
 
       try {
-        // Build message history for context
         const apiMessages = [...messages, userMessage].map((m) => ({
           role: m.role,
           content: m.content,
@@ -127,32 +103,16 @@ export function ChatWidget({
           throw new Error(error.error || "Failed to send message");
         }
 
-        // Stream the response. The route prepends inband STATUS sentinels
-        // (§STATUS:researching§ / §STATUS:typing§) before the real text. We must
-        // CONSUME these here so they drive the typing indicator and never reach
-        // the rendered message or the accumulated text.
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let accumulated = "";
-        // `pending` holds decoded bytes that haven't been committed to
-        // `accumulated` yet. A sentinel can straddle a chunk boundary, so we only
-        // commit up to a safe boundary — the byte run before any pending partial
-        // sentinel (a trailing "§") is committed; everything from the last "§"
-        // onward is held here until the next chunk completes or disproves it.
         let pending = "";
         let lastStatus: "researching" | "typing" | undefined;
         const SENTINEL = /§STATUS:(researching|typing)§/g;
 
-        // Pull complete sentinels out of `pending`, record the latest status they
-        // carry, and commit all text that isn't part of an in-progress sentinel.
-        // Returns the committed text; leaves any trailing partial sentinel (or
-        // leftover bytes) in `pending`.
-        const commitSafeText = (_id: string): string => {
+        const commitSafeText = (): string => {
           let committed = "";
           SENTINEL.lastIndex = 0;
-          // Walk through `pending`, consuming full sentinels and keeping any text
-          // before them. We re-run after each sentinel because sentinels can be
-          // adjacent to further text or another sentinel.
           let searchFrom = 0;
           while (searchFrom < pending.length) {
             SENTINEL.lastIndex = searchFrom;
@@ -162,21 +122,11 @@ export function ChatWidget({
             lastStatus = match[1] as "researching" | "typing";
             searchFrom = match.index + match[0].length;
           }
-          // `committed` now holds everything up to the last consumed sentinel, but
-          // may include a trailing text run after the final sentinel that could
-          // itself start an incomplete sentinel. Detect a pending "§" boundary:
           const lastSentinelStart = pending.indexOf("§", searchFrom);
           if (lastSentinelStart === -1) {
-            // No § beyond our consumed sentinels → commit all remaining text and
-            // clear the pending hold.
             committed += pending.slice(searchFrom);
             pending = "";
-          } else if (lastSentinelStart === searchFrom) {
-            // Remaining bytes start with § but didn't form a complete sentinel →
-            // it's a partial sentinel. Hold it back; don't commit.
-            pending = pending.slice(lastSentinelStart);
           } else {
-            // Some text, THEN a partial sentinel. Commit the text, hold the §… tail.
             committed += pending.slice(searchFrom, lastSentinelStart);
             pending = pending.slice(lastSentinelStart);
           }
@@ -187,37 +137,24 @@ export function ChatWidget({
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
-              // Flush any remaining bytes held in the decoder's internal buffer.
-              // Without this final decode, multi-byte UTF-8 characters split
-              // across chunk boundaries (or the last partial chunk) are lost,
-              // causing the response to appear truncated.
               const endTail = decoder.decode();
               if (endTail) pending += endTail;
-              // At stream end there's no next chunk to complete a sentinel, so any
-              // leftover §… is NOT a sentinel (a real sentinel would have closed
-              // with a trailing § already consumed above). Strip stray § and commit.
               const finalText = pending.replace(/§STATUS:\w*§?|§/g, "");
-              pending = "";
-              if (finalText) {
-                accumulated += finalText;
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMessage.id
-                      ? { ...m, content: accumulated, typingStatus: undefined }
-                      : m,
-                  ),
-                );
-              }
+              if (finalText) accumulated += finalText;
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessage.id
+                    ? { ...m, content: accumulated, typingStatus: undefined }
+                    : m,
+                ),
+              );
               break;
             }
 
             const chunk = decoder.decode(value, { stream: true });
             pending += chunk;
-            const committed = commitSafeText(assistantMessage.id);
-
-            if (committed) {
-              accumulated += committed;
-            }
+            const committed = commitSafeText();
+            if (committed) accumulated += committed;
 
             setMessages((prev) =>
               prev.map((m) =>
@@ -225,9 +162,7 @@ export function ChatWidget({
                   ? {
                       ...m,
                       content: accumulated,
-                      typingStatus: accumulated
-                        ? undefined // real text has arrived — hide the indicator
-                        : (lastStatus ?? m.typingStatus),
+                      typingStatus: accumulated ? undefined : (lastStatus ?? m.typingStatus),
                     }
                   : m,
               ),
@@ -238,10 +173,7 @@ export function ChatWidget({
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMessage.id
-              ? {
-                  ...m,
-                  content: `Sorry, something went wrong. ${err instanceof Error ? err.message : "Please try again."}`,
-                }
+              ? { ...m, content: `Error: ${err instanceof Error ? err.message : "Request failed."}`, typingStatus: undefined }
               : m,
           ),
         );
@@ -253,153 +185,146 @@ export function ChatWidget({
     [botPublicId, messages, isLoading],
   );
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    sendMessage(input);
-  }
-
-  function handleQuickReply(reply: string) {
-    sendMessage(reply);
-  }
-
-  function copyMessage(content: string, id: string) {
-    navigator.clipboard.writeText(content);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  }
-
   return (
-    <div className="flex h-full flex-col">
+    <div className={cn("flex h-full flex-col bg-background relative overflow-hidden", className)}>
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
+      
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-8 relative z-10">
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            {msg.role === "assistant" && (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <Bot className="h-4 w-4 text-primary" />
-              </div>
+            className={cn(
+              "flex gap-4 group animate-fade-in",
+              msg.role === "user" ? "flex-row-reverse" : "flex-row"
             )}
+          >
+            {/* Avatar */}
+            <div className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-glow transition-transform group-hover:scale-110",
+              msg.role === "assistant" ? "bg-ai-gradient" : "bg-muted"
+            )}>
+              {msg.role === "assistant" ? (
+                <Sparkles className="h-5 w-5 text-white" />
+              ) : (
+                <User className="h-5 w-5 text-muted-foreground" />
+              )}
+            </div>
 
-            <div className="flex flex-col">
-              {msg.role === "assistant" && botName && msg.id !== "greeting" && (
-                <span className="mb-1 text-xs font-semibold text-foreground/80">
-                  {botName}
+            <div className={cn(
+              "flex flex-col max-w-[85%]",
+              msg.role === "user" ? "items-end" : "items-start"
+            )}>
+              {msg.role === "assistant" && botName && (
+                <span className="mb-2 text-[10px] font-black uppercase tracking-widest text-primary/60 font-mono">
+                  {botName} — AI_NODE
                 </span>
               )}
 
               <div
-                className={`group relative max-w-[80%] rounded-xl px-4 py-3 text-sm ${
+                className={cn(
+                  "relative rounded-3xl px-6 py-4 text-[15px] leading-relaxed shadow-sm transition-all",
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
+                    ? "bg-ai-gradient text-white rounded-tr-none font-medium"
+                    : "bg-[#FAF5FF] border border-[#DDD6FE] text-foreground rounded-tl-none dark:bg-[#17112F] dark:border-white/10 dark:text-[#F9FAFB]"
+                )}
               >
-              {msg.role === "assistant" ? (
-                // While the response is still streaming and no text has
-                // arrived yet, show the animated typing indicator (pill +
-                // bouncing dots) instead of an empty / placeholder bubble.
-                // Once the first real token lands, `content` is non-empty and
-                // we switch to rendering markdown.
-                !msg.content && msg.typingStatus ? (
-                  <TypingIndicator status={msg.typingStatus} />
-                ) : (
-                  <div className="prose-chat">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                )
-              ) : (
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-              )}
-
-              {/* Copy button */}
-              {msg.role === "assistant" && msg.content && (
-                <button
-                  onClick={() => copyMessage(msg.content, msg.id)}
-                  className="absolute -right-2 -top-2 hidden rounded-md border bg-background p-1 opacity-0 transition-opacity group-hover:block group-hover:opacity-100"
-                >
-                  {copiedId === msg.id ? (
-                    <Check className="h-3 w-3 text-success" />
+                {msg.role === "assistant" ? (
+                  !msg.content && msg.typingStatus ? (
+                    <TypingIndicator status={msg.typingStatus} />
                   ) : (
-                    <Copy className="h-3 w-3 text-muted-foreground" />
-                  )}
-                </button>
-              )}
+                    <div className="prose-chat dark:prose-invert">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  )
+                ) : (
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                )}
 
-              {/* Citations */}
-              {msg.citations && msg.citations.length > 0 && (
-                <div className="mt-3 border-t pt-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">
-                    Sources:
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {msg.citations.map((citation, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center rounded-md bg-background/50 px-2 py-0.5 text-xs"
-                      >
-                        {citation.documentName}
-                        {citation.heading && ` — ${citation.heading}`}
-                      </span>
-                    ))}
+                {/* Citations */}
+                {msg.citations && msg.citations.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-primary/10">
+                    <div className="flex items-center gap-2 mb-2">
+                       <Info className="h-3 w-3 text-primary" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-primary/60 font-mono">Source_Verified</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {msg.citations.map((citation, i) => (
+                        <span key={i} className="inline-flex items-center rounded-lg bg-primary/5 border border-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
+                          {citation.documentName}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Actions */}
+                {msg.role === "assistant" && msg.content && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(msg.content);
+                      setCopiedId(msg.id);
+                      setTimeout(() => setCopiedId(null), 2000);
+                    }}
+                    className="absolute -right-12 top-0 h-10 w-10 flex items-center justify-center rounded-xl border border-white/10 bg-background/50 backdrop-blur-sm opacity-0 transition-all hover:bg-primary hover:text-white group-hover:opacity-100"
+                  >
+                    {copiedId === msg.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </button>
+                )}
               </div>
             </div>
-
-            {msg.role === "user" && (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                <User className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick replies */}
-      {quickReplies.length > 0 && messages.length <= 1 && (
-        <div className="flex flex-wrap gap-2 px-4 pb-2">
-          {quickReplies.map((reply) => (
-            <Button
-              key={reply}
-              variant="outline"
-              size="sm"
-              onClick={() => handleQuickReply(reply)}
-              disabled={isLoading}
-              className="text-xs"
-            >
-              {reply}
-            </Button>
-          ))}
-        </div>
-      )}
-
       {/* Input area */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex gap-2 border-t p-4"
-      >
-        <Input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message…"
-          disabled={isLoading}
-          className="flex-1"
-          autoFocus
-        />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={!input.trim() || isLoading}
+      <div className="p-6 border-t border-white/5 bg-background/50 backdrop-blur-md relative z-10">
+        {quickReplies.length > 0 && messages.length <= 1 && (
+          <div className="flex flex-wrap gap-2 mb-4 animate-slide-up">
+            {quickReplies.map((reply) => (
+              <button
+                key={reply}
+                onClick={() => sendMessage(reply)}
+                disabled={isLoading}
+                className="px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-xs font-bold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+              >
+                {reply}
+              </button>
+            ))}
+          </div>
+        )}
+        
+        <form
+          onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
+          className="relative flex items-center gap-3"
         >
-          <Send className="h-4 w-4" />
-        </Button>
-      </form>
+          <div className="relative flex-1 group">
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask the AI anything..."
+              disabled={isLoading}
+              className="h-14 pl-6 pr-16 rounded-2xl border-white/10 bg-white/5 focus:ring-primary/20 focus:border-primary/50 transition-all text-base"
+            />
+            <div className="absolute right-3 top-2.5">
+               <Button
+                type="submit"
+                size="icon"
+                disabled={!input.trim() || isLoading}
+                className="h-9 w-9 rounded-xl shadow-glow"
+                variant="gradient"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </form>
+        <div className="mt-4 flex items-center justify-center gap-2">
+           <span className="text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest opacity-50">Powered by SupportIQ Neural_Core_v2</span>
+        </div>
+      </div>
     </div>
   );
 }
