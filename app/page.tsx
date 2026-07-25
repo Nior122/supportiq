@@ -22,7 +22,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button as UIButton } from "@/components/ui/button";
-import { AnimatedBot } from "@/components/landing/animated-bot";
 
 /* ──────────────────────────── Data ──────────────────────────── */
 
@@ -153,34 +152,9 @@ export default function LandingPage() {
                 </UIButton>
               </motion.div>
             </div>
-
-            {/* Premium App Preview */}
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.4 }}
-              className="relative mx-auto mt-32 max-w-6xl"
-            >
-              <div className="relative rounded-[2.5rem] border border-white/10 bg-black/40 p-4 shadow-[0_0_100px_-20px_rgba(124,58,237,0.3)] backdrop-blur-xl">
-                <div className="overflow-hidden rounded-[1.8rem] border border-white/5 bg-[#0F0728] shadow-inner">
-                  <div className="flex h-12 items-center gap-2 border-b border-white/5 bg-white/5 px-6">
-                    <div className="flex gap-2">
-                      <div className="h-3 w-3 rounded-full bg-red-500/50" />
-                      <div className="h-3 w-3 rounded-full bg-yellow-500/50" />
-                      <div className="h-3 w-3 rounded-full bg-green-500/50" />
-                    </div>
-                    <div className="mx-auto flex h-6 w-64 items-center justify-center rounded-full bg-white/5 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                      app.supportiq.io
-                    </div>
-                  </div>
-                  <div className="aspect-[16/10] bg-gradient-to-br from-[#17112F] to-[#0F0728] flex items-center justify-center overflow-hidden">
-                    <AnimatedBot />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
           </div>
         </section>
+
 
         {/* ─── Features Grid ─── */}
         <section id="features" className="container px-6 py-32 lg:py-48">
