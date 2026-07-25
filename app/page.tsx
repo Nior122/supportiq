@@ -26,6 +26,11 @@ import {
   Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AIParticles } from "@/components/animations/AIParticles";
+import { FloatingRobot } from "@/components/animations/FloatingRobot";
+import { FloatingCard } from "@/components/animations/FloatingCard";
+import { ChatDemo } from "@/components/animations/ChatDemo";
+import { WorkflowAnimation } from "@/components/animations/WorkflowAnimation";
 
 const features = [
   {
@@ -115,76 +120,52 @@ export default function LandingPage() {
           <div className="absolute inset-0 -z-10">
              <div className="absolute left-1/2 top-0 h-[600px] w-[1000px] -translate-x-1/2 bg-blue-500/5 blur-[120px]" />
              <div className="absolute inset-0 bg-grid-pattern opacity-[0.03]" />
+             <AIParticles />
           </div>
 
           <div className="container relative z-10 px-6">
-            <div className="mx-auto max-w-[900px] text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-600 mb-8 dark:bg-blue-900/10 dark:border-blue-800 dark:text-blue-400">
-                  <Sparkles className="h-3 w-3" />
-                  Experience Enterprise AI
-                </div>
-                <h1 className="text-6xl font-extrabold tracking-tighter text-slate-900 sm:text-7xl lg:text-[88px] lg:leading-[1] mb-8 dark:text-white">
-                  Intelligent support <br />
-                  <span className="ai-gradient-text">for everyone.</span>
-                </h1>
-                <p className="mx-auto mt-10 max-w-[700px] text-xl leading-relaxed text-slate-600 sm:text-2xl dark:text-slate-400">
-                   Automate your customer service with AI that actually understands. 
-                   Set up intelligent assistants in minutes, trained on your data.
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row"
-              >
-                <Button size="lg" className="rounded-xl shadow-glow px-10" asChild>
-                  <Link href="/sign-up">Get Started for Free</Link>
-                </Button>
-                <Button size="lg" variant="secondary" className="rounded-xl px-10 group" asChild>
-                  <a href="#features">
-                    See Features <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </a>
-                </Button>
-              </motion.div>
-            </div>
-            
-            {/* Hero Visual */}
-            <motion.div 
-               initial={{ opacity: 0, y: 40 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 1, delay: 0.4 }}
-               className="mt-24 mx-auto max-w-5xl rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:border-slate-800"
-            >
-               <div className="overflow-hidden rounded-[1.8rem] border border-slate-100 dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-950 aspect-[16/9] flex items-center justify-center relative">
-                  <div className="absolute inset-0 bg-ai-gradient-primary opacity-[0.02] pointer-events-none" />
-                  <div className="flex flex-col items-center gap-8">
-                     <div className="h-24 w-24 rounded-[2rem] bg-ai-gradient-primary shadow-glow flex items-center justify-center">
-                        <ZapIcon className="h-12 w-12 text-white fill-white" />
-                     </div>
-                     <div className="flex flex-col items-center gap-2">
-                        <span className="text-[12px] font-black uppercase tracking-[0.4em] text-blue-600 dark:text-blue-400">System_Status: Optimal</span>
-                        <div className="flex gap-1">
-                           {[...Array(3)].map((_, i) => (
-                             <div key={i} className="h-1 w-8 rounded-full bg-blue-600/20 dark:bg-blue-400/20 overflow-hidden">
-                                <motion.div 
-                                   animate={{ x: ["-100%", "100%"] }}
-                                   transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-                                   className="h-full w-full bg-blue-600 dark:bg-blue-400" 
-                                />
-                             </div>
-                           ))}
-                        </div>
-                     </div>
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="flex-1 text-center lg:text-left">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-600 mb-8 dark:bg-blue-900/10 dark:border-blue-800 dark:text-blue-400">
+                    <Sparkles className="h-3 w-3" />
+                    Experience Enterprise AI
                   </div>
-               </div>
-            </motion.div>
+                  <h1 className="text-6xl font-extrabold tracking-tighter text-slate-900 sm:text-7xl lg:text-[88px] lg:leading-[1] mb-8 dark:text-white">
+                    Intelligent support <br />
+                    <span className="ai-gradient-text">for everyone.</span>
+                  </h1>
+                  <p className="mx-auto lg:mx-0 mt-10 max-w-[700px] text-xl leading-relaxed text-slate-600 sm:text-2xl dark:text-slate-400">
+                     Automate your customer service with AI that actually understands. 
+                     Deploy intelligent assistants in minutes.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mt-12 flex flex-col items-center lg:items-start justify-center lg:justify-start gap-6 sm:flex-row"
+                >
+                  <Button size="lg" className="rounded-xl shadow-glow px-10" asChild>
+                    <Link href="/sign-up">Get Started for Free</Link>
+                  </Button>
+                  <Button size="lg" variant="secondary" className="rounded-xl px-10 group" asChild>
+                    <a href="#features">
+                      See Features <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </a>
+                  </Button>
+                </motion.div>
+              </div>
+
+              <div className="flex-1 w-full max-w-[500px] aspect-square relative">
+                 <FloatingRobot />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -218,9 +199,10 @@ export default function LandingPage() {
                        ))}
                     </div>
                  </div>
-                 <div className="relative aspect-square rounded-[3rem] bg-slate-50 border border-slate-200 flex items-center justify-center dark:bg-slate-900 dark:border-slate-800 overflow-hidden">
-                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.05]" />
-                    <Sparkles className="h-48 w-48 text-blue-100 dark:text-blue-900/20 animate-pulse" />
+                 <div className="flex-1 w-full flex flex-col items-center gap-12 relative">
+                    <div className="absolute inset-0 bg-grid-pattern opacity-[0.05] pointer-events-none" />
+                    <WorkflowAnimation />
+                    <ChatDemo />
                  </div>
               </div>
            </div>
@@ -237,24 +219,25 @@ export default function LandingPage() {
              </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="group relative flex flex-col rounded-[2rem] border border-slate-200 bg-white p-10 transition-all hover:border-blue-500/30 hover:shadow-premium dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-blue-400/30"
-              >
-                <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 transition-all group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-900/20 dark:text-blue-400 dark:group-hover:bg-blue-500">
-                  <feature.icon className="h-7 w-7" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4 dark:text-white">{feature.title}</h3>
-                <p className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
-                  {feature.description}
-                </p>
-              </motion.div>
+              <FloatingCard key={feature.title} delay={i * 100}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group relative flex flex-col h-full rounded-[2rem] border border-slate-200 bg-white p-10 transition-all hover:border-blue-500/30 hover:shadow-premium dark:bg-slate-900/50 dark:border-slate-800 dark:hover:border-blue-400/30"
+                >
+                  <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 transition-all group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-900/20 dark:text-blue-400 dark:group-hover:bg-blue-500">
+                    <feature.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 dark:text-white font-mono uppercase text-[15px] tracking-widest">{feature.title}</h3>
+                  <p className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              </FloatingCard>
             ))}
           </div>
         </section>
