@@ -12,22 +12,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.96] hover:scale-[1.02]",
   {
     variants: {
       variant: {
         primary:
-          "bg-primary text-primary-foreground shadow-glow hover:shadow-glow-strong hover:bg-primary/90 active:scale-[0.98]",
+          "bg-primary text-primary-foreground shadow-glow hover:shadow-glow-strong hover:bg-primary/90",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-soft hover:bg-secondary/90 active:scale-[0.98]",
+          "bg-secondary text-secondary-foreground shadow-soft hover:bg-secondary/90",
         outline:
-          "border border-primary/20 bg-background/50 backdrop-blur-sm hover:border-primary/50 hover:bg-primary/5 hover:text-primary active:scale-[0.98]",
-        ghost: "hover:bg-primary/5 hover:text-primary active:scale-[0.98]",
+          "border border-primary/20 bg-background/50 backdrop-blur-sm hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
+        ghost: "hover:bg-primary/5 hover:text-primary",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-soft hover:bg-destructive/90 active:scale-[0.98]",
+          "bg-destructive text-destructive-foreground shadow-soft hover:bg-destructive/90",
         link: "text-primary underline-offset-4 hover:underline",
         gradient:
-          "bg-ai-gradient text-white shadow-glow hover:shadow-glow-strong hover:opacity-90 active:scale-[0.98] border-none",
+          "bg-ai-gradient text-white shadow-glow hover:shadow-glow-strong hover:opacity-90 border-none",
       },
       size: {
         sm: "h-8 px-3 text-xs",

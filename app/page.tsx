@@ -22,6 +22,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button as UIButton } from "@/components/ui/button";
+import { AIParticles } from "@/components/animations/AIParticles";
+import { FloatingRobot } from "@/components/animations/FloatingRobot";
+import { FloatingCard } from "@/components/animations/FloatingCard";
+import { ChatDemo } from "@/components/animations/ChatDemo";
+import { WorkflowAnimation } from "@/components/animations/WorkflowAnimation";
 
 /* ──────────────────────────── Data ──────────────────────────── */
 
@@ -113,44 +118,51 @@ export default function LandingPage() {
           <div className="absolute inset-0 -z-10">
             <div className="absolute left-1/2 top-0 h-[800px] w-[1200px] -translate-x-1/2 bg-primary/5 opacity-50 blur-[120px]" />
             <div className="absolute inset-0 bg-grid-pattern opacity-[0.05]" />
+            <AIParticles />
           </div>
 
           <div className="container relative z-10 px-6">
-            <div className="mx-auto max-w-[900px] text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary mb-8 shadow-sm">
-                  <Sparkles className="h-3 w-3" />
-                  Experience the new era of support
-                </div>
-                <h1 className="text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-[100px] lg:leading-[1] text-foreground mb-8">
-                  Intelligent support <br />
-                  <span className="ai-gradient-text">for everyone.</span>
-                </h1>
-                <p className="mx-auto mt-10 max-w-[700px] text-xl leading-relaxed text-muted-foreground sm:text-2xl">
-                  Automate your customer service with AI that actually understands. 
-                  Deploy intelligent assistants in minutes, trained on your data.
-                </p>
-              </motion.div>
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="flex-1 text-center lg:text-left">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary mb-8 shadow-sm">
+                    <Sparkles className="h-3 w-3" />
+                    Experience the new era of support
+                  </div>
+                  <h1 className="text-6xl font-extrabold tracking-tight sm:text-7xl lg:text-[90px] lg:leading-[1] text-foreground mb-8">
+                    Intelligent support <br />
+                    <span className="ai-gradient-text">for everyone.</span>
+                  </h1>
+                  <p className="mx-auto lg:mx-0 mt-10 max-w-[600px] text-xl leading-relaxed text-muted-foreground sm:text-2xl">
+                    Automate your customer service with AI that actually understands. 
+                    Deploy intelligent assistants in minutes.
+                  </p>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row"
-              >
-                <UIButton size="xl" variant="gradient" className="rounded-full shadow-glow animate-float" asChild>
-                  <Link href="/sign-up">Start Building Now</Link>
-                </UIButton>
-                <UIButton size="xl" variant="outline" className="rounded-full group" asChild>
-                  <a href="#features">
-                    Explore Platform <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </a>
-                </UIButton>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mt-12 flex flex-col items-center lg:items-start justify-center lg:justify-start gap-6 sm:flex-row"
+                >
+                  <UIButton size="xl" variant="gradient" className="rounded-full shadow-glow" asChild>
+                    <Link href="/sign-up">Start Building Now</Link>
+                  </UIButton>
+                  <UIButton size="xl" variant="outline" className="rounded-full group" asChild>
+                    <a href="#features">
+                      Explore Platform <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </a>
+                  </UIButton>
+                </motion.div>
+              </div>
+
+              <div className="flex-1 w-full max-w-[500px] aspect-square relative">
+                 <FloatingRobot />
+              </div>
             </div>
           </div>
         </section>
@@ -169,22 +181,23 @@ export default function LandingPage() {
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="group relative flex flex-col rounded-3xl border border-primary/10 bg-card p-10 transition-all hover:border-primary/40 hover:shadow-premium hover:-translate-y-1"
-              >
-                <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
-                  <feature.icon className="h-7 w-7" />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-4">{feature.title}</h3>
-                <p className="text-base leading-relaxed text-muted-foreground">
-                  {feature.description}
-                </p>
-              </motion.div>
+              <FloatingCard key={feature.title} delay={i * 100}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group relative flex flex-col h-full rounded-3xl border border-primary/10 bg-card p-10 transition-all hover:border-primary/40 hover:shadow-premium"
+                >
+                  <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
+                    <feature.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-4 uppercase font-mono text-[16px] tracking-widest">{feature.title}</h3>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              </FloatingCard>
             ))}
           </div>
         </section>
@@ -193,7 +206,7 @@ export default function LandingPage() {
         <section className="bg-primary/5 py-32 lg:py-48 relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-[0.03]" />
           <div className="container relative z-10 px-6">
-            <div className="flex flex-col items-center justify-between gap-16 lg:flex-row">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
               <div className="max-w-[550px]">
                 <h2 className="text-4xl font-black tracking-tight sm:text-5xl text-foreground mb-8">
                   Deployment in <span className="ai-gradient-text text-6xl">minutes</span>, not weeks.
@@ -212,18 +225,17 @@ export default function LandingPage() {
                         {i + 1}
                       </div>
                       <div>
-                        <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{step.title}</h4>
+                        <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors font-mono uppercase text-[13px] tracking-widest">{step.title}</h4>
                         <p className="text-muted-foreground">{step.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="relative aspect-square w-full max-w-[600px] rounded-[3rem] border border-primary/20 bg-card shadow-2xl overflow-hidden group">
-                 <div className="absolute inset-0 bg-ai-gradient opacity-10 transition-opacity group-hover:opacity-20" />
-                 <div className="flex h-full items-center justify-center">
-                    <Sparkles className="h-48 w-42 text-primary animate-pulse" strokeWidth={0.5} />
-                 </div>
+              
+              <div className="flex-1 w-full flex flex-col items-center gap-12">
+                 <WorkflowAnimation />
+                 <ChatDemo />
               </div>
             </div>
           </div>
