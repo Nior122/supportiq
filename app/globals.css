@@ -114,7 +114,7 @@
   }
 
   .shadow-premium {
-    box-shadow: 0 0 50px -10px rgba(33, 114, 229, 0.2);
+    box-shadow: 0 0 50px -10px rgba(0, 242, 255, 0.15);
   }
 
   .skeleton {
@@ -169,5 +169,8 @@
   }
   .prose-chat blockquote {
     @apply border-l-4 border-primary/20 pl-3 italic text-zinc-400;
+  }
+}
+@apply border-l-4 border-primary/20 pl-3 italic text-zinc-400;
   }
 }
