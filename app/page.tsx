@@ -172,11 +172,8 @@ export default function LandingPage() {
                       app.supportiq.io
                     </div>
                   </div>
-                  <div className="aspect-[16/10] bg-gradient-to-br from-[#17112F] to-[#0F0728] flex items-center justify-center">
-                    <div className="relative">
-                       <Bot className="h-32 w-32 text-primary/20 animate-pulse" strokeWidth={1} />
-                       <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full animate-pulse" />
-                    </div>
+                  <div className="aspect-[16/10] bg-gradient-to-br from-[#17112F] to-[#0F0728] flex items-center justify-center overflow-hidden">
+                    <AnimatedBot />
                   </div>
                 </div>
               </div>
@@ -319,6 +316,19 @@ export default function LandingPage() {
                 { q: "How secure is my training data?", a: "SupportIQ employs end-to-end AES-256 encryption. Your documents are never shared or used to train public LLM models." },
                 { q: "Can I bring my own API keys?", a: "Yes. Enterprise customers can bring their own keys for Anthropic, OpenAI, or Groq to maintain complete sovereignty." },
                 { q: "Does it support multilingual chat?", a: "Absolutely. Our AI assistants automatically detect and respond in over 90 languages with native-level proficiency." },
+              ].map((item) => (
+                <FAQItem key={item.q} item={item} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
+    </div>
+  );
+}
+tomatically detect and respond in over 90 languages with native-level proficiency." },
               ].map((item) => (
                 <FAQItem key={item.q} item={item} />
               ))}
