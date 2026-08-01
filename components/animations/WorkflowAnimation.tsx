@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import anime from "animejs";
-import { MessageSquare, Bot, Database, CheckCircle2, ArrowRight } from "lucide-react";
+import { MessageSquare, Bot, Database, CheckCircle2 } from "lucide-react";
 
 export function WorkflowAnimation() {
   const containerRef = useRef<HTMLDivElement>(null);

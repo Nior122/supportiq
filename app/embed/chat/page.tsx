@@ -16,6 +16,7 @@
  */
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { prisma } from "@/lib/prisma";
+import { hexToHsl } from "@/lib/utils";
 
 interface EmbedChatPageProps {
   searchParams: Promise<{ botId?: string; theme?: string }>;
@@ -24,6 +25,7 @@ interface EmbedChatPageProps {
 export default async function EmbedChatPage({ searchParams }: EmbedChatPageProps) {
   const params = await searchParams;
   const botId = params.botId;
+  const theme = params.theme; // 'light' | 'dark'
 
   if (!botId) {
     return (
@@ -33,7 +35,7 @@ export default async function EmbedChatPage({ searchParams }: EmbedChatPageProps
     );
   }
 
-  // Look up bot config (minimal — no workspace data, no auth)
+  // Look up bot config
   const bot = await prisma.bot.findUnique({
     where: { publicId: botId },
     select: {
@@ -56,23 +58,30 @@ export default async function EmbedChatPage({ searchParams }: EmbedChatPageProps
 
   // Apply bot appearance settings
   const appearance = bot.appearance as Record<string, string> | null;
-  const primaryColor = appearance?.primaryColor ?? "#6366f1";
+  const primaryColorHex = appearance?.primaryColor ?? "#2563eb";
+  const primaryHsl = hexToHsl(primaryColorHex);
 
   return (
     <div
-      className="flex h-dvh flex-col bg-background"
-      style={
-        {
-          "--primary": primaryColor,
-        } as React.CSSProperties
-      }
+      className={theme === "dark" ? "dark" : ""}
+      style={{ height: '100dvh' }}
     >
-      <ChatWidget
-        botPublicId={botId}
-        botName={bot.name}
-        greeting={bot.greeting ?? undefined}
-        quickReplies={bot.quickReplies as string[]}
-      />
+      <div
+        className="flex h-full flex-col bg-background text-foreground transition-colors duration-300"
+        style={
+          {
+            "--primary": primaryHsl,
+            "--ring": primaryHsl,
+          } as React.CSSProperties
+        }
+      >
+        <ChatWidget
+          botPublicId={botId}
+          botName={bot.name}
+          greeting={bot.greeting ?? undefined}
+          quickReplies={bot.quickReplies as string[]}
+        />
+      </div>
     </div>
   );
 }

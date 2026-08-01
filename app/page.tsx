@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ArrowRight,
   Sparkles,
-  ZapIcon,
   Activity,
   Layers,
   Search,
